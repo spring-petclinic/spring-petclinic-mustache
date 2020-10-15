@@ -1,0 +1,84 @@
+{{!
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <body>}}
+
+{{#layout}}{{#menu}}Owners{{/menu}}
+
+    <h2>Owner Information</h2>
+  
+  
+    {{#owner}}<table class="table table-striped">
+      <tr>
+        <th>Name</th>
+        <td><b>{{firstName}} {{lastName}}</b></td>
+      </tr>
+      <tr>
+        <th>Address</th>
+        <td>{{address}}</td>
+      </tr>
+      <tr>
+        <th>City</th>
+        <td>{{city}}</td>
+      </tr>
+      <tr>
+        <th>Telephone</th>
+        <td>{{telephone}}</td>
+      </tr>
+    </table>{{/owner}}
+  
+    <a href="{{owner.id}}/edit" class="btn btn-default">Edit
+      Owner</a>
+    <a href="{{owner.id}}/pets/new" class="btn btn-default">Add
+      New Pet</a>
+  
+    <br />
+    <br />
+    <br />
+    <h2>Pets and Visits</h2>
+  
+    <table class="table table-striped">
+  
+      {{#owner.pets}}<tr>
+        <td valign="top">
+          <dl class="dl-horizontal">
+            <dt>Name</dt>
+            <dd>{{name}}</dd>
+            <dt>Birth Date</dt>
+            <dd>
+              {{birthDate}}</dd>
+            <dt>Type</dt>
+            <dd>{{type}}</dd>
+          </dl>
+        </td>
+        <td valign="top">
+          <table class="table-condensed">
+            <thead>
+              <tr>
+                <th>Visit Date</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            {{#visits}}<tr>
+              <td th:text="${#temporals.format(visit.date, 'yyyy-MM-dd')}"></td>
+              <td th:text="${visit?.description}"></td>
+            </tr>{{/visits}}
+            <tr>
+              <td><a href="{{owner.id}}/pets/{{id}}/edit">Edit
+                  Pet</a></td>
+              <td><a href="{{owner.id}}/pets/{{id}}/visits/new">Add
+                  Visit</a></td>
+            </tr>
+          </table>
+        </td>
+      </tr>{{/owner.pets}}
+  
+    </table>
+
+{{/layout}}
+
+{{!  </body>
+
+</html>}}

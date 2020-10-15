@@ -1,0 +1,34 @@
+{{!
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <body>}}
+
+{{#layout}}{{#menu}}Owners{{/menu}}
+
+  <h2>Owner</h2>
+  {{#owner}}<form class="form-horizontal" id="add-owner-form" method="post">
+    <div class="form-group has-feedback">
+      {{#inputField}}owner, First Name, firstName, text{{/inputField}}
+      {{#inputField}}owner, Last Name, lastName, text{{/inputField}}
+      {{#inputField}}owner, Address, address, text{{/inputField}}
+      {{#inputField}}owner, City, city, text{{/inputField}}
+      {{#inputField}}owner, Telephone, telephone, text{{/inputField}}
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button
+          class="btn btn-default" type="submit">
+          {{#new}}Add Owner{{/new}}
+          {{^new}}Update Owner{{/new}}
+        </button>
+      </div>
+    </div>
+  </form>{{/owner}}
+
+{{/layout}}
+
+{{!  </body>
+
+</html>}}

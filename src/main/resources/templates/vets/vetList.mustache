@@ -1,0 +1,32 @@
+{{!
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <body>}}
+
+{{#layout}}{{#menu}}Vets{{/menu}}
+
+  <h2>Veterinarians</h2>
+
+  <table id="vets" class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Specialties</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#vets.vetList}}<tr>
+        <td>{{firstName}} {{lastName}}</td>
+        <td>{{#specialties}}<span>{{name}}</span> {{/specialties}}
+        {{^special}}<span>none</span>{{/special}}</td>
+      </tr>{{/vets.vetList}}
+    </tbody>
+  </table>
+
+{{/layout}}
+
+{{!  </body>
+
+</html>}}
