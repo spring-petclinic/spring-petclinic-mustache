@@ -8,24 +8,26 @@
 {{#layout}}{{#menu}}Owners{{/menu}}
 
   <h2>Owner</h2>
-  {{#owner}}<form class="form-horizontal" id="add-owner-form" method="post">
+  <form class="form-horizontal" id="add-owner-form" method="post">
+    {{#form.owner}}
     <div class="form-group has-feedback">
-      {{#inputField}}owner, First Name, firstName, text{{/inputField}}
-      {{#inputField}}owner, Last Name, lastName, text{{/inputField}}
-      {{#inputField}}owner, Address, address, text{{/inputField}}
-      {{#inputField}}owner, City, city, text{{/inputField}}
-      {{#inputField}}owner, Telephone, telephone, text{{/inputField}}
+      {{#inputField}}First Name <input name="firstName"/>{{/inputField}}
+      {{#inputField}}Last Name <input name="lastName"/>{{/inputField}}
+      {{#inputField}}Address <input name="address"/>{{/inputField}}
+      {{#inputField}}City <input name="city"/>{{/inputField}}
+      {{#inputField}}Telephone <input name="telephone"/>{{/inputField}}
     </div>
+    {{/form.owner}}
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
-        <button
+        {{#owner}}<button
           class="btn btn-default" type="submit">
           {{#new}}Add Owner{{/new}}
           {{^new}}Update Owner{{/new}}
-        </button>
+        </button>{{/owner}}
       </div>
     </div>
-  </form>{{/owner}}
+  </form>
 
 {{/layout}}
 

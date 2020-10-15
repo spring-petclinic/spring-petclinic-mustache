@@ -20,9 +20,11 @@
           {{#owner}}<span>{{firstName}} {{lastName}}</span>{{/owner}}
         </div>
       </div>
-      {{#inputField}}pet, Name, name, text{{/inputField}}
-      {{#inputField}}pet, Birth Date, birthDate, date{{/inputField}}
-      {{#selectField}}pet, Type, type, types{{/selectField}}
+      {{#form.pet}}
+        {{#inputField}}Name <input name="name"/>{{/inputField}}
+        {{#inputField}}Birth Date <input name="birthDate" type="date"/>{{/inputField}}
+        {{#selectField}}Type <input name="type" values="types"/>{{/selectField}}
+      {{/form.pet}}
     </div>
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
