@@ -16,6 +16,19 @@
 
 package org.springframework.samples.petclinic.owner;
 
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.samples.petclinic.system.Application;
+import org.springframework.samples.petclinic.visit.VisitRepository;
+import org.springframework.test.web.servlet.MockMvc;
+
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -23,20 +36,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.samples.petclinic.visit.VisitRepository;
-import org.springframework.test.web.servlet.MockMvc;
-
 /**
  * Test class for {@link VisitController}
  *
  * @author Colin But
  */
 @WebMvcTest(VisitController.class)
+@Import({ Application.class })
 class VisitControllerTests {
 
 	private static final int TEST_PET_ID = 1;
@@ -52,7 +58,14 @@ class VisitControllerTests {
 
 	@BeforeEach
 	void init() {
-		given(this.pets.findById(TEST_PET_ID)).willReturn(new Pet());
+		Pet value = new Pet();
+		value.setName("Fred");
+		value.setBirthDate(LocalDate.now());
+		value.setOwner(new Owner());
+		PetType type = new PetType();
+		type.setName("pig");
+		value.setType(type);
+		given(this.pets.findById(TEST_PET_ID)).willReturn(value);
 	}
 
 	@Test

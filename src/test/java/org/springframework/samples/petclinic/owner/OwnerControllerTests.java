@@ -25,9 +25,12 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.samples.petclinic.system.Application;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.test.web.servlet.MockMvc;
@@ -49,6 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Colin But
  */
 @WebMvcTest(OwnerController.class)
+@Import({ Application.class })
 class OwnerControllerTests {
 
 	private static final int TEST_OWNER_ID = 1;
@@ -80,6 +84,7 @@ class OwnerControllerTests {
 		max.setType(dog);
 		max.setName("Max");
 		max.setBirthDate(LocalDate.now());
+		max.setOwner(george);
 		george.setPetsInternal(Collections.singleton(max));
 		given(this.owners.findById(TEST_OWNER_ID)).willReturn(george);
 		Visit visit = new Visit();
@@ -118,7 +123,12 @@ class OwnerControllerTests {
 
 	@Test
 	void testProcessFindFormSuccess() throws Exception {
-		given(this.owners.findByLastName("")).willReturn(Lists.newArrayList(george, new Owner()));
+		Owner owner = new Owner();
+		owner.setId(123);
+		owner.setAddress("Nowhere");
+		owner.setCity("");
+		owner.setTelephone("123456789");
+		given(this.owners.findByLastName("")).willReturn(Lists.newArrayList(george, owner));
 		mockMvc.perform(get("/owners")).andExpect(status().isOk()).andExpect(view().name("owners/ownersList"));
 	}
 
