@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -27,6 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Mustache.CustomContext;
 import com.samskivert.mustache.Template.Fragment;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,24 +58,13 @@ class FormWidgetControllerAdvice {
     }
 
     @ModelAttribute("form")
-    public Map<String, Form> form(Map<String, Object> model) {
-        return new LinkedHashMap<String, Form>() {
-            @Override
-            public boolean containsKey(Object key) {
-                if (!super.containsKey(key)) {
-                    put((String) key, new Form((String) key, model.get(key)));
-                }
-                return super.containsKey(key);
+    public CustomContext form(Map<String, Object> model) {
+        Map<String, Form> map = new HashMap<>();
+        return key -> {
+            if (!map.containsKey(key)) {
+                map.put(key, new Form(key, model.get(key)));
             }
-
-            @Override
-            public Form get(Object key) {
-                if (!super.containsKey(key)) {
-                    put((String) key, new Form((String) key, model.get(key)));
-                }
-                return super.get(key);
-            }
-
+            return map.get(key);
         };
     }
 
@@ -124,15 +113,11 @@ class FormWidgetControllerAdvice {
 
 }
 
-class Form implements Mustache.Lambda {
-
-    private Object target;
-
-    private String name;
+class Form extends HashMap<String, Object> implements Mustache.Lambda {
 
     public Form(String name, Object target) {
-        this.name = name;
-        this.target = target;
+        put("name", name);
+        put("target", target);
     }
 
     @Override
@@ -141,11 +126,11 @@ class Form implements Mustache.Lambda {
     }
 
     public Object getTarget() {
-        return target;
+        return get("target");
     }
 
     public String getName() {
-        return name;
+        return (String) get("name");
     }
 
 }
