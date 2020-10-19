@@ -18,7 +18,7 @@ package org.springframework.samples.petclinic.owner;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,75 +150,62 @@ class Form implements Mustache.Lambda {
 
 }
 
-class InputField {
-
-    String label;
-
-    String name;
-
-    boolean date;
-
-    boolean valid;
-
-    String value;
-
-    List<String> errors = Collections.emptyList();
+class InputField extends HashMap<String, Object> {
 
     public InputField(String label, String name, String type, BindingResult status) {
-        this.label = label;
-        this.name = name;
+        put("label", label);
+        put("name", name);
         if (status != null) {
-            valid = !status.hasFieldErrors(name);
-            errors = status.getFieldErrors(name).stream()
-                    .map(error -> error.getDefaultMessage()).collect(Collectors.toList());
-            value = status.getFieldValue(name) == null ? ""
-                    : status.getFieldValue(name).toString();
+            put("valid", !status.hasFieldErrors(name));
+            put("errors",
+                    status.getFieldErrors(name).stream()
+                            .map(error -> error.getDefaultMessage())
+                            .collect(Collectors.toList()));
+            put("value", status.getFieldValue(name) == null ? ""
+                    : status.getFieldValue(name).toString());
         }
-        this.date = "date".equals(type);
+        else {
+            put("valid", false);
+        }
+        put("date", "date".equals(type));
     }
 
 }
 
-class SelectField {
-
-    String label;
-
-    String name;
-
-    boolean valid;
-
-    String value;
-
-    List<String> errors = Collections.emptyList();
-
-    List<Option> values = new ArrayList<Option>();
+class SelectField extends HashMap<String, Object> {
 
     public SelectField(String label, String name, List<String> values,
             BindingResult status) {
-        this.label = label;
-        this.name = name;
+        put("label", label);
+        put("name", name);
+        String value;
         if (status != null) {
-            valid = !status.hasFieldErrors(name);
-            errors = status.getFieldErrors(name).stream()
-                    .map(error -> error.getDefaultMessage()).collect(Collectors.toList());
+            put("valid", !status.hasFieldErrors(name));
+            put("errors",
+                    status.getFieldErrors(name).stream()
+                            .map(error -> error.getDefaultMessage())
+                            .collect(Collectors.toList()));
             value = status.getFieldValue(name) == null ? ""
                     : status.getFieldValue(name).toString();
         }
-        for (String value : values) {
-            this.values.add(new Option(value, value.equals(this.value)));
+        else {
+            put("valid", false);
+            value = "";
         }
+        put("value", value);
+        List<Option> options = new ArrayList<Option>();
+        for (String str : values) {
+            options.add(new Option(str, str.equals(value)));
+        }
+        put("values", options);
     }
 
-    static class Option {
+    static class Option extends HashMap<String, Object> {
 
         public Option(String value, boolean selected) {
-            this.value = value;
-            this.selected = selected;
+            put("value", value);
+            put("selected", selected);
         }
-
-        String value;
-
-        boolean selected;
 
     }
 

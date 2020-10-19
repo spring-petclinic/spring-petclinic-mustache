@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.system;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.samskivert.mustache.Mustache;
@@ -37,56 +38,57 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @ControllerAdvice
 public class LayoutAdvice {
 
-	private final Mustache.Compiler compiler;
+    private final Mustache.Compiler compiler;
 
-	private Application application;
+    private Application application;
 
-	@Autowired
-	public LayoutAdvice(Mustache.Compiler compiler, Application application) {
-		this.compiler = compiler;
-		this.application = application;
-	}
+    @Autowired
+    public LayoutAdvice(Mustache.Compiler compiler, Application application) {
+        this.compiler = compiler;
+        this.application = application;
+    }
 
-	@ModelAttribute("menus")
-	public Iterable<Menu> menus(@ModelAttribute Layout layout) {
-		for (Menu menu : application.getMenus()) {
-			menu.setActive(false);
-		}
-		return application.getMenus();
-	}
+    @ModelAttribute("menus")
+    public Iterable<Menu> menus(@ModelAttribute Layout layout) {
+        for (Menu menu : application.getMenus()) {
+            menu.setActive(false);
+        }
+        return application.getMenus();
+    }
 
-	@ModelAttribute("menu")
-	public Mustache.Lambda menu(@ModelAttribute Layout layout) {
-		return (frag, out) -> {
-			Menu menu = application.getMenu(frag.execute());
-			menu.setActive(true);
-			layout.title = menu.getTitle();
-		};
-	}
+    @ModelAttribute("menu")
+    public Mustache.Lambda menu(@ModelAttribute Layout layout) {
+        return (frag, out) -> {
+            Menu menu = application.getMenu(frag.execute());
+            menu.setActive(true);
+            layout.setTitle(menu.getTitle());
+        };
+    }
 
-	@ModelAttribute("layout")
-	public Mustache.Lambda layout(Map<String, Object> model) {
-		return new Layout(compiler);
-	}
+    @ModelAttribute("layout")
+    public Mustache.Lambda layout(Map<String, Object> model) {
+        return new Layout(compiler);
+    }
 
 }
 
-class Layout implements Mustache.Lambda {
+class Layout extends HashMap<String, String> implements Mustache.Lambda {
 
-	String title = "Spring PetClinic";
+    private Compiler compiler;
 
-	String body;
+    public Layout(Compiler compiler) {
+        this.compiler = compiler;
+        setTitle("Spring PetClinic");
+    }
 
-	private Compiler compiler;
+    public void setTitle(String title) {
+        put("title", title);
+    }
 
-	public Layout(Compiler compiler) {
-		this.compiler = compiler;
-	}
-
-	@Override
-	public void execute(Fragment frag, Writer out) throws IOException {
-		body = frag.execute();
-		compiler.compile("{{>fragments/layout}}").execute(frag.context(), out);
-	}
+    @Override
+    public void execute(Fragment frag, Writer out) throws IOException {
+        put("body", frag.execute());
+        compiler.compile("{{>fragments/layout}}").execute(frag.context(), out);
+    }
 
 }
