@@ -24,6 +24,35 @@
       </tr>{{/vets.vetList}}
     </tbody>
   </table>
+  {{#hasPages}}<div>
+      <span>Pages:</span>
+      <span>[</span>
+      {{#pages}}<span">
+          {{^current}}<a href="/vets.html/?page={{number}}">{{number}}</a>{{/current}}
+          {{#current}}<span>{{number}}</span>{{/current}}
+      </span>{{/pages}}
+      <span>]&nbsp;</span>
+      <span>
+          {{^first}}<a href="/vets.html/?page=1" title="First"
+              class="fa fa-fast-backward"></a>{{/first}}
+          {{#first}}<span title="First" class="fa fa-fast-backward"></span>{{/first}}
+      </span>
+      <span>
+          {{^first}}<a href="/vets.html/?page={{previous}}" title="Previous"
+              class="fa fa-step-backward"></a>{{/first}}
+          {{#first}}<span title="Previous" class="fa fa-step-backward"></span>{{/first}}
+      </span>
+      <span>
+          {{^last}}<a href="/vets.html/?page={{next}}" title="Next"
+              class="fa fa-step-forward"></a>{{/last}}
+          {{#last}}<span title="Next" class="fa fa-step-forward"></span>{{/last}}
+      </span>
+      <span>
+          {{^last}}<a href="/vets.html/?page={{totalPages}}" title="Last"
+              class="fa fa-fast-forward"></a>{{/last}}
+          {{#last}}<span title="Last" class="fa fa-fast-forward"></span>{{/last}}
+      </span>
+  </div>{{/hasPages}}
 
 {{/layout}}
 

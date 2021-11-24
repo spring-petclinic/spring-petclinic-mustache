@@ -15,11 +15,18 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Spliterator.OfInt;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import javax.validation.Valid;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +36,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -44,7 +52,7 @@ class OwnerController {
 
 	private final OwnerRepository owners;
 
-	private VisitRepository visits;
+	private final VisitRepository visits;
 
 	public OwnerController(OwnerRepository clinicService, VisitRepository visits) {
 		this.owners = clinicService;
@@ -67,8 +75,7 @@ class OwnerController {
 	public String processCreationForm(@Valid Owner owner, BindingResult result) {
 		if (result.hasErrors()) {
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
-		}
-		else {
+		} else {
 			this.owners.save(owner);
 			return "redirect:/owners/" + owner.getId();
 		}
@@ -81,7 +88,8 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners")
-	public String processFindForm(Owner owner, BindingResult result, Map<String, Object> model) {
+	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
+			Model model) {
 
 		// allow parameterless GET request for /owners to return all records
 		if (owner.getLastName() == null) {
@@ -89,22 +97,53 @@ class OwnerController {
 		}
 
 		// find owners by last name
-		Collection<Owner> results = this.owners.findByLastName(owner.getLastName());
-		if (results.isEmpty()) {
+		String lastName = owner.getLastName();
+		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, lastName);
+		if (ownersResults.isEmpty()) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
 			return "owners/findOwners";
-		}
-		else if (results.size() == 1) {
+		} else if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
-			owner = results.iterator().next();
+			owner = ownersResults.iterator().next();
 			return "redirect:/owners/" + owner.getId();
-		}
-		else {
+		} else {
 			// multiple owners found
-			model.put("selections", results);
-			return "owners/ownersList";
+			lastName = owner.getLastName();
+			return addPaginationModel(page, model, lastName, ownersResults);
 		}
+	}
+
+	private String addPaginationModel(int page, Model model, String lastName, Page<Owner> paginated) {
+		List<Owner> listOwners = paginated.getContent();
+		model.addAttribute("first", page == 1);
+		model.addAttribute("last", page == paginated.getTotalPages());
+		model.addAttribute("previous", page - 1);
+		model.addAttribute("next", page + 1);
+		model.addAttribute("pages", IntStream.range(1, paginated.getTotalPages() + 1)
+				.mapToObj(value -> new PageModel(value, page)).collect(Collectors.toList()));
+		model.addAttribute("hasPages", paginated.getTotalPages() > 1);
+		model.addAttribute("totalPages", paginated.getTotalPages());
+		model.addAttribute("listOwners", listOwners);
+		return "owners/ownersList";
+	}
+
+	static class PageModel {
+		boolean current;
+		int number;
+
+		PageModel(int value, int page) {
+			current = value == page;
+			number = value;
+		}
+	}
+
+	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
+
+		int pageSize = 5;
+		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		return owners.findByLastName(lastname, pageable);
+
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
@@ -119,8 +158,7 @@ class OwnerController {
 			@PathVariable("ownerId") int ownerId) {
 		if (result.hasErrors()) {
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
-		}
-		else {
+		} else {
 			owner.setId(ownerId);
 			this.owners.save(owner);
 			return "redirect:/owners/{ownerId}";
@@ -129,6 +167,7 @@ class OwnerController {
 
 	/**
 	 * Custom handler for displaying an owner.
+	 *
 	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
 	 */

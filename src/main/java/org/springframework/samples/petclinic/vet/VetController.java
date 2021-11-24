@@ -15,11 +15,19 @@
  */
 package org.springframework.samples.petclinic.vet;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.vet.VetController.PageModel;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author Juergen Hoeller
@@ -37,13 +45,43 @@ class VetController {
 	}
 
 	@GetMapping("/vets.html")
-	public String showVetList(Map<String, Object> model) {
+	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		// Here we are returning an object of type 'Vets' rather than a collection of Vet
 		// objects so it is simpler for Object-Xml mapping
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vets.findAll());
-		model.put("vets", vets);
+		Page<Vet> paginated = findPaginated(page);
+		vets.getVetList().addAll(paginated.toList());
+		model.addAttribute("vets", vets);
+		return addPaginationModel(page, paginated, model);
+
+	}
+
+	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
+		model.addAttribute("first", page == 1);
+		model.addAttribute("last", page == paginated.getTotalPages());
+		model.addAttribute("previous", page - 1);
+		model.addAttribute("next", page + 1);
+		model.addAttribute("pages", IntStream.range(1, paginated.getTotalPages() + 1)
+				.mapToObj(value -> new PageModel(value, page)).collect(Collectors.toList()));
+		model.addAttribute("hasPages", paginated.getTotalPages() > 1);
+		model.addAttribute("totalPages", paginated.getTotalPages());
 		return "vets/vetList";
+	}
+
+	static class PageModel {
+		boolean current;
+		int number;
+
+		PageModel(int value, int page) {
+			current = value == page;
+			number = value;
+		}
+	}
+
+	private Page<Vet> findPaginated(int page) {
+		int pageSize = 5;
+		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		return vets.findAll(pageable);
 	}
 
 	@GetMapping({ "/vets" })
