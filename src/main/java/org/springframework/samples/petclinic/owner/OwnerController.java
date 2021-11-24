@@ -15,12 +15,11 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Spliterator.OfInt;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 
 import javax.validation.Valid;
 
@@ -75,7 +74,8 @@ class OwnerController {
 	public String processCreationForm(@Valid Owner owner, BindingResult result) {
 		if (result.hasErrors()) {
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
-		} else {
+		}
+		else {
 			this.owners.save(owner);
 			return "redirect:/owners/" + owner.getId();
 		}
@@ -103,11 +103,13 @@ class OwnerController {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
 			return "owners/findOwners";
-		} else if (ownersResults.getTotalElements() == 1) {
+		}
+		else if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
 			return "redirect:/owners/" + owner.getId();
-		} else {
+		}
+		else {
 			// multiple owners found
 			lastName = owner.getLastName();
 			return addPaginationModel(page, model, lastName, ownersResults);
@@ -121,21 +123,18 @@ class OwnerController {
 		model.addAttribute("previous", page - 1);
 		model.addAttribute("next", page + 1);
 		model.addAttribute("pages", IntStream.range(1, paginated.getTotalPages() + 1)
-				.mapToObj(value -> new PageModel(value, page)).collect(Collectors.toList()));
+				.mapToObj(value -> pagemodel(value, page)).collect(Collectors.toList()));
 		model.addAttribute("hasPages", paginated.getTotalPages() > 1);
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("listOwners", listOwners);
 		return "owners/ownersList";
 	}
 
-	static class PageModel {
-		boolean current;
-		int number;
-
-		PageModel(int value, int page) {
-			current = value == page;
-			number = value;
-		}
+	private Map<String, Object> pagemodel(int value, int page) {
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("current", value == page);
+		map.put("number", value);
+		return map;
 	}
 
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
@@ -158,7 +157,8 @@ class OwnerController {
 			@PathVariable("ownerId") int ownerId) {
 		if (result.hasErrors()) {
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
-		} else {
+		}
+		else {
 			owner.setId(ownerId);
 			this.owners.save(owner);
 			return "redirect:/owners/{ownerId}";
@@ -167,7 +167,6 @@ class OwnerController {
 
 	/**
 	 * Custom handler for displaying an owner.
-	 *
 	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
 	 */
