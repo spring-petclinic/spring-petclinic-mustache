@@ -81,7 +81,7 @@ class VetControllerTests {
 	void testShowVetListHtml() throws Exception {
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/vets.html?page=1")).andExpect(status().isOk())
-				.andExpect(model().attributeExists("listVets")).andExpect(view().name("vets/vetList"));
+				.andExpect(model().attributeExists("vets")).andExpect(view().name("vets/vetList"));
 
 	}
 

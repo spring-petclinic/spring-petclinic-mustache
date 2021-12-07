@@ -136,7 +136,12 @@ class OwnerControllerTests {
 
 	@Test
 	void testProcessFindFormSuccess() throws Exception {
-		Page<Owner> tasks = new PageImpl<Owner>(Lists.newArrayList(george, new Owner()));
+		Owner owner = new Owner();
+		owner.setId(32);
+		owner.setAddress("Nowhere");
+		owner.setCity("None");
+		owner.setTelephone("123456");
+		Page<Owner> tasks = new PageImpl<Owner>(Lists.newArrayList(george, owner));
 		Mockito.when(this.owners.findByLastName(anyString(), any(Pageable.class))).thenReturn(tasks);
 		mockMvc.perform(get("/owners?page=1")).andExpect(status().isOk()).andExpect(view().name("owners/ownersList"));
 	}
