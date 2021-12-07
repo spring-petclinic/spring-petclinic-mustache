@@ -62,8 +62,8 @@
               </tr>
             </thead>
             {{#visits}}<tr>
-              <td th:text="${#temporals.format(visit.date, 'yyyy-MM-dd')}"></td>
-              <td th:text="${visit?.description}"></td>
+              <td>{{date}}</td>
+              <td>{{description}}</td>
             </tr>{{/visits}}
             <tr>
               <td><a href="{{owner.id}}/pets/{{id}}/edit">Edit
