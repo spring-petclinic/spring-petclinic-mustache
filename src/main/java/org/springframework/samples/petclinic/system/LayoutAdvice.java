@@ -20,14 +20,13 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.samskivert.mustache.Mustache;
-import com.samskivert.mustache.Mustache.Compiler;
-import com.samskivert.mustache.Template.Fragment;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.system.Application.Menu;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Mustache.Compiler;
+import com.samskivert.mustache.Template.Fragment;
 
 /**
  * Utilities for rendering the HTML layout (menus, logs etc.)
@@ -42,7 +41,6 @@ public class LayoutAdvice {
 
 	private Application application;
 
-	@Autowired
 	public LayoutAdvice(Mustache.Compiler compiler, Application application) {
 		this.compiler = compiler;
 		this.application = application;

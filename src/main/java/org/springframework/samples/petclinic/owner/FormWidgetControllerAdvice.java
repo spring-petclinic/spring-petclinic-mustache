@@ -25,14 +25,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.samskivert.mustache.Mustache;
-import com.samskivert.mustache.Mustache.CustomContext;
-import com.samskivert.mustache.Template.Fragment;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Mustache.CustomContext;
+import com.samskivert.mustache.Template.Fragment;
 
 /**
  * Utilities for rendering views of owners and pets.
@@ -51,7 +50,6 @@ class FormWidgetControllerAdvice {
 
 	private final Mustache.Compiler compiler;
 
-	@Autowired
 	public FormWidgetControllerAdvice(Mustache.Compiler compiler) {
 		this.compiler = compiler;
 	}
