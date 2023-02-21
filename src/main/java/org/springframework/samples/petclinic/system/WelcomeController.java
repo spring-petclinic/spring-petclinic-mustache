@@ -19,12 +19,20 @@ package org.springframework.samples.petclinic.system;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import io.jstach.jstache.JStache;
+import io.jstach.opt.spring.webmvc.JStachioModelView;
+
 @Controller
 class WelcomeController {
 
 	@GetMapping("/")
-	public String welcome() {
-		return "welcome";
+	public JStachioModelView welcome() {
+		return JStachioModelView.of(new WelcomePage());
 	}
+
+}
+
+@JStache(path = "welcome")
+class WelcomePage extends BasePage {
 
 }

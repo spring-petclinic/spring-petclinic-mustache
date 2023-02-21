@@ -29,6 +29,7 @@
     <node.version>v8.11.1</node.version>
     <nohttp-checkstyle.version>0.0.10</nohttp-checkstyle.version>
     <spring-format.version>0.0.31</spring-format.version>
+    <jstach.version>0.9.3</jstach.version>
 
   </properties>
 
@@ -56,11 +57,17 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-mustache</artifactId>
+      <artifactId>spring-boot-starter-test</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <groupId>io.jstach</groupId>
+      <artifactId>jstachio</artifactId>
+      <version>${jstach.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jstach</groupId>
+      <artifactId>jstachio-spring</artifactId>
+      <version>${jstach.version}</version>
     </dependency>
 
     <!-- Databases - Uses H2 by default -->
@@ -113,14 +120,26 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-configuration-processor</artifactId>
-    	<optional>true</optional>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>io.jstach</groupId>
+              <artifactId>jstachio-apt</artifactId>
+              <version>${jstach.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>io.spring.javaformat</groupId>
         <artifactId>spring-javaformat-maven-plugin</artifactId>
@@ -316,20 +335,21 @@
             <artifactId>libsass-maven-plugin</artifactId>
             <version>0.2.26</version>
             <executions>
-               <execution>
-                  <phase>generate-resources</phase>
-                  <?m2e execute onConfiguration,onIncremental?>
-                  <goals>
-                     <goal>compile</goal>
-                  </goals>
-               </execution>
+              <execution>
+                <phase>generate-resources</phase>
+                <?m2e execute onConfiguration,onIncremental?>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+              </execution>
             </executions>
             <configuration>
-               <inputPath>${basedir}/src/main/scss/</inputPath>
-               <outputPath>${basedir}/src/main/resources/static/resources/css/</outputPath>
-               <includePath>${project.build.directory}/webjars/META-INF/resources/webjars/bootstrap/${webjars-bootstrap.version}/scss/</includePath>
+              <inputPath>${basedir}/src/main/scss/</inputPath>
+              <outputPath>${basedir}/src/main/resources/static/resources/css/</outputPath>
+              <includePath>
+                ${project.build.directory}/webjars/META-INF/resources/webjars/bootstrap/${webjars-bootstrap.version}/scss/</includePath>
             </configuration>
-         </plugin>
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -362,7 +382,7 @@
                         </goals>
                       </pluginExecutionFilter>
                       <action>
-                        <ignore/>
+                        <ignore />
                       </action>
                     </pluginExecution>
                     <pluginExecution>
@@ -375,7 +395,7 @@
                         </goals>
                       </pluginExecutionFilter>
                       <action>
-                        <ignore/>
+                        <ignore />
                       </action>
                     </pluginExecution>
                     <pluginExecution>
@@ -388,7 +408,7 @@
                         </goals>
                       </pluginExecutionFilter>
                       <action>
-                        <ignore/>
+                        <ignore />
                       </action>
                     </pluginExecution>
                   </pluginExecutions>

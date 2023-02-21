@@ -5,14 +5,14 @@
 
   <body>}}
 
-{{#layout}}{{#menu}}Home{{/menu}}
+{{<fragments/layout}}{{$menu}}home{{/menu}}{{$body}}
     <h2 th:text="#{welcome}">Welcome</h2>
     <div class="row">
         <div class="col-md-12">
           <img class="img-responsive" src="resources/images/pets.png"/>
         </div>
     </div>
-{{/layout}}
+{{/body}}{{/fragments/layout}}
 
 {{!  </body>
 

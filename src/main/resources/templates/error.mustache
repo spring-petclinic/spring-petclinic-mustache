@@ -5,13 +5,13 @@
 
   <body>}}
 
-{{#layout}}
+{{<fragments/layout}}{{$menu}}home{{/menu}}{{$body}}
 
     <img src="/resources/images/pets.png"/>
     <h2>Something happened...</h2>
     <p>{{message}}</p>
 
-{{/layout}}
+{{/body}}{{/fragments/layout}}
 
 {{!  </body>
 
