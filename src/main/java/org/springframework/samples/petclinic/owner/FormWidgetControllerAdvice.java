@@ -15,8 +15,6 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +26,13 @@ import java.util.stream.Collectors;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.support.RequestContext;
 
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Mustache.CustomContext;
-import com.samskivert.mustache.Template.Fragment;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Utilities for rendering views of owners and pets.
@@ -55,11 +56,16 @@ class FormWidgetControllerAdvice {
 	}
 
 	@ModelAttribute("form")
-	public CustomContext form(Map<String, Object> model) {
-		Map<String, Form> map = new HashMap<>();
+	public CustomContext form(Map<String, Object> model, HttpServletRequest context) {
+		Map<String, Object> map = new HashMap<>();
 		return key -> {
 			if (!map.containsKey(key)) {
-				map.put(key, new Form(key, model.get(key)));
+				Form form = new Form(key, model.get(key));
+				map.put(key, form);
+				BindStatus status = new RequestContext(context, model).getBindStatus(key + ".*");
+				if (status != null) {
+					form.put("fields", status);
+				}
 			}
 			return map.get(key);
 		};
@@ -108,16 +114,11 @@ class FormWidgetControllerAdvice {
 
 }
 
-class Form extends HashMap<String, Object> implements Mustache.Lambda {
+class Form extends HashMap<String, Object> {
 
 	public Form(String name, Object target) {
 		put("name", name);
 		put("target", target);
-	}
-
-	@Override
-	public void execute(Fragment frag, Writer out) throws IOException {
-		frag.execute(this, out);
 	}
 
 	public Object getTarget() {
