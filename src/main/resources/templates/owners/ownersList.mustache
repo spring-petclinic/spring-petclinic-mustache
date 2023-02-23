@@ -5,7 +5,7 @@
 
   <body>}}
 
-{{#layout}}{{#menu}}Owners{{/menu}}
+{{<fragments/layout}}{{$menu}}owners{{/menu}}{{$body}}
 
     <h2>Owners</h2>
 
@@ -62,7 +62,7 @@
         </span>
     </div>{{/hasPages}}
 
-{{/layout}}
+{{/body}}{{/fragments/layout}}
 
 {{!  </body>
 

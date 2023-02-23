@@ -5,12 +5,13 @@
 
   <body>}}
 
-{{#layout}}{{#menu}}Owners{{/menu}}
+{{<fragments/layout}}{{$menu}}owners{{/menu}}{{$body}}
 
     <h2>Owner Information</h2>
   
   
-    {{#owner}}<table class="table table-striped">
+    {{#owner}}
+    <table class="table table-striped">
       <tr>
         <th>Name</th>
         <td><b>{{firstName}} {{lastName}}</b></td>
@@ -27,7 +28,7 @@
         <th>Telephone</th>
         <td>{{telephone}}</td>
       </tr>
-    </table>{{/owner}}
+    </table>
   
     <a href="{{owner.id}}/edit" class="btn btn-primary">Edit
       Owner</a>
@@ -41,7 +42,7 @@
   
     <table class="table table-striped">
   
-      {{#owner.pets}}<tr>
+      {{#pets}}<tr>
         <td valign="top">
           <dl class="dl-horizontal">
             <dt>Name</dt>
@@ -63,7 +64,7 @@
             </thead>
             {{#visits}}<tr>
               <td>{{date}}</td>
-              <td>{{.}}</td>
+              <td>{{description}}</td>
             </tr>{{/visits}}
             <tr>
               <td><a href="{{owner.id}}/pets/{{id}}/edit">Edit
@@ -73,11 +74,12 @@
             </tr>
           </table>
         </td>
-      </tr>{{/owner.pets}}
+      </tr>{{/pets}}
   
     </table>
+    {{/owner}}
 
-{{/layout}}
+{{/body}}{{/fragments/layout}}
 
 {{!  </body>
 

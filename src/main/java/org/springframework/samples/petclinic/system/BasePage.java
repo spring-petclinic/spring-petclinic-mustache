@@ -4,25 +4,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.system.Application.Menu;
-import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.support.RequestContext;
+
+import io.jstach.jstache.JStacheLambda;
+import io.jstach.jstache.JStacheLambda.Raw;
+import io.jstach.jstachio.JStachio;
 
 public class BasePage {
 
 	private Application application;
 
-	private Map<String, BindingResult> status = new HashMap<>();
-
 	private String active = "home";
+
+	private @NonNull RequestContext context;
 
 	@Autowired
 	public void setApplication(Application application) {
 		this.application = application;
-	}
-
-	public void setStatus(String name, BindingResult status) {
-		this.status.put(name, status);
 	}
 
 	public void activate(String name) {
@@ -38,8 +40,22 @@ public class BasePage {
 		return application.getMenus();
 	}
 
-	public BindingResult status(String name) {
-		return this.status.get(name);
+	public BindStatus status(String name) {
+		return this.context.getBindStatus(name + ".*");
+	}
+
+	public BindStatus status(String name, String field) {
+		return this.context.getBindStatus(name + "." + field);
+	}
+
+	public void setRequestContext(@NonNull RequestContext context) {
+		this.context = context;
+	}
+
+	@JStacheLambda
+	@Raw
+	public String inputField(InputField field) {
+		return JStachio.render(field);
 	}
 
 }

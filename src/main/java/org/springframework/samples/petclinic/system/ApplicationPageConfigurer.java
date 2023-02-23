@@ -15,11 +15,12 @@
  */
 package org.springframework.samples.petclinic.system;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.samples.petclinic.mustache.PageConfigurer;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.servlet.support.RequestContext;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -42,12 +43,8 @@ public class ApplicationPageConfigurer implements PageConfigurer {
 	public void configure(Object page, Map<String, ?> model, HttpServletRequest request) {
 		if (page instanceof BasePage) {
 			BasePage base = (BasePage) page;
-			for (String key : model.keySet()) {
-				if (key.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
-					String name = key.substring(BindingResult.MODEL_KEY_PREFIX.length());
-					base.setStatus(name, (BindingResult) model.get(key));
-				}
-			}
+			Map<String, Object> map = new HashMap<>(model);
+			base.setRequestContext(new RequestContext(request, map));
 			base.setApplication(application);
 		}
 	}

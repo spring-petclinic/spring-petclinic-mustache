@@ -15,17 +15,15 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.system.BasePage;
+import org.springframework.samples.petclinic.system.Form;
+import org.springframework.samples.petclinic.system.InputField;
+import org.springframework.samples.petclinic.system.PagedModelPage;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,10 +31,20 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
+
+import io.jstach.jstache.JStache;
+import io.jstach.jstache.JStacheLambda;
+import io.jstach.jstache.JStacheLambda.Raw;
+import io.jstach.jstachio.JStachio;
+import io.jstach.opt.spring.webmvc.JStachioModelView;
+import jakarta.validation.Valid;
 
 /**
  * @author Juergen Hoeller
@@ -46,8 +54,6 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller
 class OwnerController {
-
-	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
 	private final OwnerRepository owners;
 
@@ -63,32 +69,34 @@ class OwnerController {
 		dataBinder.setDisallowedFields("id");
 	}
 
+	@ModelAttribute("owner")
+	public Owner findOwner(@PathVariable(name = "ownerId", required = false) Integer ownerId) {
+		return ownerId == null ? new Owner() : this.owners.findById(ownerId);
+	}
+
 	@GetMapping("/owners/new")
-	public String initCreationForm(Map<String, Object> model) {
-		Owner owner = new Owner();
-		model.put("owner", owner);
-		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
+	public View initCreationForm(Owner owner) {
+		return JStachioModelView.of(new EditOwnerPage(owner));
 	}
 
 	@PostMapping("/owners/new")
-	public String processCreationForm(@Valid Owner owner, BindingResult result) {
+	public View processCreationForm(@Valid Owner owner, BindingResult result) {
 		if (result.hasErrors()) {
-			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
+			return initCreationForm(owner);
 		}
 		else {
 			this.owners.save(owner);
-			return "redirect:/owners/" + owner.getId();
+			return new RedirectView("/owners/" + owner.getId());
 		}
 	}
 
 	@GetMapping("/owners/find")
-	public String initFindForm(Map<String, Object> model) {
-		model.put("owner", new Owner());
-		return "owners/findOwners";
+	public View initFindForm(Owner owner) {
+		return JStachioModelView.of(new FindOwnerPage(owner));
 	}
 
 	@GetMapping("/owners")
-	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
+	public View processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
 			Model model) {
 
 		// allow parameterless GET request for /owners to return all records
@@ -102,39 +110,18 @@ class OwnerController {
 		if (ownersResults.isEmpty()) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
-			return "owners/findOwners";
+			return JStachioModelView.of(new FindOwnerPage(owner));
 		}
 		else if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
-			return "redirect:/owners/" + owner.getId();
+			return new RedirectView("/owners/" + owner.getId());
 		}
 		else {
 			// multiple owners found
 			lastName = owner.getLastName();
-			return addPaginationModel(page, model, lastName, ownersResults);
+			return JStachioModelView.of(new OwnersPage(page, ownersResults));
 		}
-	}
-
-	private String addPaginationModel(int page, Model model, String lastName, Page<Owner> paginated) {
-		List<Owner> listOwners = paginated.getContent();
-		model.addAttribute("first", page == 1);
-		model.addAttribute("last", page == paginated.getTotalPages());
-		model.addAttribute("previous", page - 1);
-		model.addAttribute("next", page + 1);
-		model.addAttribute("pages", IntStream.range(1, paginated.getTotalPages() + 1)
-				.mapToObj(value -> pagemodel(value, page)).collect(Collectors.toList()));
-		model.addAttribute("hasPages", paginated.getTotalPages() > 1);
-		model.addAttribute("totalPages", paginated.getTotalPages());
-		model.addAttribute("listOwners", listOwners);
-		return "owners/ownersList";
-	}
-
-	private Map<String, Object> pagemodel(int value, int page) {
-		HashMap<String, Object> map = new HashMap<>();
-		map.put("current", value == page);
-		map.put("number", value);
-		return map;
 	}
 
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
@@ -146,22 +133,21 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
-	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
+	public View initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
-		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
+		return initCreationForm(owner);
 	}
 
 	@PostMapping("/owners/{ownerId}/edit")
-	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result,
-			@PathVariable("ownerId") int ownerId) {
+	public View processUpdateOwnerForm(@Valid Owner owner, BindingResult result, @PathVariable("ownerId") int ownerId) {
 		if (result.hasErrors()) {
-			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
+			return initCreationForm(owner);
 		}
 		else {
 			owner.setId(ownerId);
 			this.owners.save(owner);
-			return "redirect:/owners/{ownerId}";
+			return new RedirectView("/owners/" + owner.getId());
 		}
 	}
 
@@ -172,13 +158,103 @@ class OwnerController {
 	 */
 	@GetMapping("/owners/{ownerId}")
 	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
-		ModelAndView mav = new ModelAndView("owners/ownerDetails");
 		Owner owner = this.owners.findById(ownerId);
+		ModelAndView mav = new ModelAndView(JStachioModelView.of(new OwnerPage(owner)));
 		for (Pet pet : owner.getPets()) {
 			pet.setVisitsInternal(visits.findByPetId(pet.getId()));
 		}
 		mav.addObject(owner);
 		return mav;
+	}
+
+}
+
+@JStache(path = "owners/findOwners")
+class FindOwnerPage extends BasePage {
+
+	final Owner owner;
+
+	FindOwnerPage(Owner owner) {
+		this.owner = owner;
+	}
+
+	Form form() {
+		return new Form("owner", this.owner);
+	}
+
+	String[] errors() {
+		return status("owner").getErrorMessages();
+	}
+
+}
+
+@JStache(path = "owners/createOrUpdateOwnerForm")
+class EditOwnerPage extends BasePage {
+
+	final Owner owner;
+
+	EditOwnerPage(Owner owner) {
+		this.owner = owner;
+	}
+
+	Form form() {
+		return new Form("owner", this.owner);
+	}
+
+	String[] errors() {
+		return status("owner").getErrorMessages();
+	}
+
+	InputField firstName() {
+		return new InputField("First Name", "firstName", this.owner.getFirstName(), "text",
+				status("owner", "firstName"));
+	}
+
+	InputField lastName() {
+		return new InputField("Last Name", "lastName", this.owner.getLastName(), "text", status("owner", "lastName"));
+	}
+
+	InputField address() {
+		return new InputField("Address", "address", this.owner.getAddress(), "text", status("owner", "address"));
+	}
+
+	InputField city() {
+		return new InputField("City", "city", this.owner.getCity(), "text", status("owner", "city"));
+	}
+
+	InputField telephone() {
+		return new InputField("Telephone", "telephone", this.owner.getTelephone(), "text",
+				status("owner", "telephone"));
+	}
+
+	@JStacheLambda
+	@Raw
+	public String render(InputField field) {
+		return JStachio.render(field);
+	}
+
+}
+
+@JStache(path = "owners/ownerDetails")
+class OwnerPage extends BasePage {
+
+	final Owner owner;
+
+	OwnerPage(Owner owner) {
+		this.owner = owner;
+	}
+
+}
+
+@JStache(path = "owners/ownersList")
+class OwnersPage extends PagedModelPage<Owner> {
+
+	OwnersPage(int page, Page<Owner> paginated) {
+		super(page, paginated);
+	}
+
+	List<Owner> listOwners() {
+		return list();
 	}
 
 }
