@@ -219,12 +219,6 @@ class EditOwnerPage extends BasePage {
 				status("owner", "telephone"));
 	}
 
-	@JStacheLambda
-	@Raw
-	public String inputField(InputField field) {
-		return JStachio.render(field);
-	}
-
 }
 
 @JStache(path = "owners/ownerDetails")

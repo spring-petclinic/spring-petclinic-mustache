@@ -134,10 +134,4 @@ class VisitPage extends BasePage {
 				status("visit", "description"));
 	}
 
-	@JStacheLambda
-	@Raw
-	public String inputField(InputField field) {
-		return JStachio.render(field);
-	}
-
 }

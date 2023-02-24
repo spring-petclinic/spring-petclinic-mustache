@@ -54,7 +54,7 @@ public class BasePage {
 
 	@JStacheLambda
 	@Raw
-	public String inputField(InputField field) {
+	public String render(Object field) {
 		return JStachio.render(field);
 	}
 

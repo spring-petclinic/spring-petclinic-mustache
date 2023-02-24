@@ -163,16 +163,4 @@ class PetPage extends BasePage {
 				this.types.stream().map(item -> item.toString()).collect(Collectors.toList()), status("pet", "type"));
 	}
 
-	@JStacheLambda
-	@Raw
-	public String inputField(InputField field) {
-		return JStachio.render(field);
-	}
-
-	@JStacheLambda
-	@Raw
-	public String selectField(SelectField field) {
-		return JStachio.render(field);
-	}
-
 }

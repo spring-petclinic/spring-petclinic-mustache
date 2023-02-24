@@ -24,9 +24,9 @@
         </div>
       </div>
       {{#form}}
-        {{#nameField}}{{#inputField}}Name <input name="name"/>{{/inputField}}{{/nameField}}
-        {{#birthDate}}{{#inputField}}Birth Date <input name="birthDate" type="date"/>{{/inputField}}{{/birthDate}}
-        {{#type}}{{#selectField}}Type <input name="type" values="types"/>{{/selectField}}{{/type}}
+        {{#nameField}}{{#render}}Name <input name="name"/>{{/render}}{{/nameField}}
+        {{#birthDate}}{{#render}}Birth Date <input name="birthDate" type="date"/>{{/render}}{{/birthDate}}
+        {{#type}}{{#render}}Type <input name="type" values="types"/>{{/render}}{{/type}}
       {{/form}}
     </div>
 {{#pet}}
