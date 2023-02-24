@@ -16,14 +16,15 @@
 
 package org.springframework.samples.petclinic.vet;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.util.List;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import io.jstach.opt.spring.webmvc.JStachioModelView;
+
 /**
  * Test class for the {@link VetController}
  */
@@ -54,17 +57,16 @@ class VetControllerTests {
 	@MockBean
 	private VetRepository vets;
 
-	private Vet james;
-
-	private Vet helen;
-
-	@BeforeEach
-	void setup() {
-		james = new Vet();
+	private Vet james() {
+		Vet james = new Vet();
 		james.setFirstName("James");
 		james.setLastName("Carter");
 		james.setId(1);
-		helen = new Vet();
+		return james;
+	}
+
+	private Vet helen() {
+		Vet helen = new Vet();
 		helen.setFirstName("Helen");
 		helen.setLastName("Leary");
 		helen.setId(2);
@@ -72,8 +74,14 @@ class VetControllerTests {
 		radiology.setId(1);
 		radiology.setName("radiology");
 		helen.addSpecialty(radiology);
-		given(this.vets.findAll()).willReturn(Lists.newArrayList(james, helen));
-		given(this.vets.findAll(any(Pageable.class))).willReturn(new PageImpl<Vet>(Lists.newArrayList(james, helen)));
+		return helen;
+	}
+
+	@BeforeEach
+	void setup() {
+		given(this.vets.findAll()).willReturn(Lists.newArrayList(james(), helen()));
+		given(this.vets.findAll(any(Pageable.class)))
+				.willReturn(new PageImpl<Vet>(Lists.newArrayList(james(), helen())));
 
 	}
 
@@ -81,7 +89,11 @@ class VetControllerTests {
 	void testShowVetListHtml() throws Exception {
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/vets.html?page=1")).andExpect(status().isOk())
-				.andExpect(model().attributeExists("vets")).andExpect(view().name("vets/vetList"));
+				.andExpect(result -> {
+					JStachioModelView view = (JStachioModelView) result.getModelAndView().getView();
+					VetsPage vets = (VetsPage) view.model();
+					assertThat(vets.listVets()).isInstanceOf(List.class);
+				});
 
 	}
 

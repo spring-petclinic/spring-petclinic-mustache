@@ -47,7 +47,7 @@ class VetController {
 	}
 
 	@GetMapping("/vets.html")
-	public View showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
+	public View showVetList(@RequestParam(defaultValue = "1") int page) {
 		Page<Vet> paginated = findPaginated(page);
 		return JStachioModelView.of(new VetsPage(page, paginated));
 

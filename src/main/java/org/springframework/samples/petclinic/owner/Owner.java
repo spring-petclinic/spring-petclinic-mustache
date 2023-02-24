@@ -48,16 +48,16 @@ public class Owner extends Person {
 
 	@Column(name = "address")
 	@NotEmpty
-	private String address;
+	private String address = "";
 
 	@Column(name = "city")
 	@NotEmpty
-	private String city;
+	private String city = "";
 
 	@Column(name = "telephone")
 	@NotEmpty
 	@Digits(fraction = 0, integer = 10)
-	private String telephone;
+	private String telephone = "";
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "owner_id")

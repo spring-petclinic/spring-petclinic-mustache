@@ -16,6 +16,7 @@
 
 package org.springframework.samples.petclinic.owner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
@@ -28,7 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,10 +42,15 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.system.Application;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.view.RedirectView;
+
+import io.jstach.opt.spring.webmvc.JStachioModelView;
 
 /**
  * Test class for {@link OwnerController}
@@ -53,6 +58,7 @@ import org.springframework.test.web.servlet.MockMvc;
  * @author Colin But
  */
 @WebMvcTest(OwnerController.class)
+@Import({ Application.class })
 class OwnerControllerTests {
 
 	private static final int TEST_OWNER_ID = 1;
@@ -62,6 +68,12 @@ class OwnerControllerTests {
 
 	@MockBean
 	private OwnerRepository owners;
+
+	private Owner other() {
+		Owner george = new Owner();
+		george.setId(TEST_OWNER_ID + 1);
+		return george;
+	}
 
 	private Owner george() {
 		Owner george = new Owner();
@@ -101,7 +113,8 @@ class OwnerControllerTests {
 	@Test
 	void testInitCreationForm() throws Exception {
 		mockMvc.perform(get("/owners/new")).andExpect(status().isOk()).andExpect(model().attributeExists("owner"))
-				.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+				.andExpect(
+						result -> assertThat(result.getModelAndView().getView()).isInstanceOf(JStachioModelView.class));
 	}
 
 	@Test
@@ -117,21 +130,23 @@ class OwnerControllerTests {
 				post("/owners/new").param("firstName", "Joe").param("lastName", "Bloggs").param("city", "London"))
 				.andExpect(status().isOk()).andExpect(model().attributeHasErrors("owner"))
 				.andExpect(model().attributeHasFieldErrors("owner", "address"))
-				.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
-				.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+				.andExpect(model().attributeHasFieldErrors("owner", "telephone")).andExpect(
+						result -> assertThat(result.getModelAndView().getView()).isInstanceOf(JStachioModelView.class));
 	}
 
 	@Test
 	void testInitFindForm() throws Exception {
 		mockMvc.perform(get("/owners/find")).andExpect(status().isOk()).andExpect(model().attributeExists("owner"))
-				.andExpect(view().name("owners/findOwners"));
+				.andExpect(
+						result -> assertThat(result.getModelAndView().getView()).isInstanceOf(JStachioModelView.class));
 	}
 
 	@Test
 	void testProcessFindFormSuccess() throws Exception {
-		Page<Owner> tasks = new PageImpl<Owner>(Lists.newArrayList(george(), new Owner()));
+		Page<Owner> tasks = new PageImpl<Owner>(Lists.newArrayList(george(), other()));
 		Mockito.when(this.owners.findByLastName(anyString(), any(Pageable.class))).thenReturn(tasks);
-		mockMvc.perform(get("/owners?page=1")).andExpect(status().isOk()).andExpect(view().name("owners/ownersList"));
+		mockMvc.perform(get("/owners?page=1")).andExpect(status().isOk()).andExpect(
+				result -> assertThat(result.getModelAndView().getView()).isInstanceOf(JStachioModelView.class));
 	}
 
 	@Test
@@ -139,7 +154,7 @@ class OwnerControllerTests {
 		Page<Owner> tasks = new PageImpl<Owner>(Lists.newArrayList(george()));
 		Mockito.when(this.owners.findByLastName(eq("Franklin"), any(Pageable.class))).thenReturn(tasks);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Franklin")).andExpect(status().is3xxRedirection())
-				.andExpect(view().name("redirect:/owners/" + TEST_OWNER_ID));
+				.andExpect(result -> assertThat(result.getModelAndView().getView()).isInstanceOf(RedirectView.class));
 	}
 
 	@Test
@@ -148,8 +163,8 @@ class OwnerControllerTests {
 		Mockito.when(this.owners.findByLastName(eq("Unknown Surname"), any(Pageable.class))).thenReturn(tasks);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown Surname")).andExpect(status().isOk())
 				.andExpect(model().attributeHasFieldErrors("owner", "lastName"))
-				.andExpect(model().attributeHasFieldErrorCode("owner", "lastName", "notFound"))
-				.andExpect(view().name("owners/findOwners"));
+				.andExpect(model().attributeHasFieldErrorCode("owner", "lastName", "notFound")).andExpect(
+						result -> assertThat(result.getModelAndView().getView()).isInstanceOf(JStachioModelView.class));
 
 	}
 
@@ -161,8 +176,8 @@ class OwnerControllerTests {
 				.andExpect(model().attribute("owner", hasProperty("firstName", is("George"))))
 				.andExpect(model().attribute("owner", hasProperty("address", is("110 W. Liberty St."))))
 				.andExpect(model().attribute("owner", hasProperty("city", is("Madison"))))
-				.andExpect(model().attribute("owner", hasProperty("telephone", is("6085551023"))))
-				.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+				.andExpect(model().attribute("owner", hasProperty("telephone", is("6085551023")))).andExpect(
+						result -> assertThat(result.getModelAndView().getView()).isInstanceOf(JStachioModelView.class));
 	}
 
 	@Test
@@ -170,13 +185,13 @@ class OwnerControllerTests {
 		mockMvc.perform(post("/owners/{ownerId}/edit", TEST_OWNER_ID).param("firstName", "Joe")
 				.param("lastName", "Bloggs").param("address", "123 Caramel Street").param("city", "London")
 				.param("telephone", "01616291589")).andExpect(status().is3xxRedirection())
-				.andExpect(view().name("redirect:/owners/{ownerId}"));
+				.andExpect(result -> assertThat(result.getModelAndView().getView()).isInstanceOf(RedirectView.class));
 	}
 
 	@Test
 	void testProcessUpdateOwnerFormUnchangedSuccess() throws Exception {
 		mockMvc.perform(post("/owners/{ownerId}/edit", TEST_OWNER_ID)).andExpect(status().is3xxRedirection())
-				.andExpect(view().name("redirect:/owners/{ownerId}"));
+				.andExpect(result -> assertThat(result.getModelAndView().getView()).isInstanceOf(RedirectView.class));
 	}
 
 	@Test
@@ -185,8 +200,8 @@ class OwnerControllerTests {
 				.param("lastName", "Bloggs").param("address", "").param("telephone", "")).andExpect(status().isOk())
 				.andExpect(model().attributeHasErrors("owner"))
 				.andExpect(model().attributeHasFieldErrors("owner", "address"))
-				.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
-				.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+				.andExpect(model().attributeHasFieldErrors("owner", "telephone")).andExpect(
+						result -> assertThat(result.getModelAndView().getView()).isInstanceOf(JStachioModelView.class));
 	}
 
 	@Test
@@ -215,7 +230,8 @@ class OwnerControllerTests {
 					public void describeTo(Description description) {
 						description.appendText("Max did not have any visits");
 					}
-				}))).andExpect(view().name("owners/ownerDetails"));
+				}))).andExpect(
+						result -> assertThat(result.getModelAndView().getView()).isInstanceOf(JStachioModelView.class));
 	}
 
 }
