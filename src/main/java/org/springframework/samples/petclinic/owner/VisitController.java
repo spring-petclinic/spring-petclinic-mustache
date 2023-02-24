@@ -17,6 +17,9 @@ package org.springframework.samples.petclinic.owner;
 
 import java.util.Map;
 
+import org.springframework.samples.petclinic.system.BasePage;
+import org.springframework.samples.petclinic.system.Form;
+import org.springframework.samples.petclinic.system.InputField;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -25,7 +28,14 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
+import io.jstach.jstache.JStache;
+import io.jstach.jstache.JStacheLambda;
+import io.jstach.jstache.JStacheLambda.Raw;
+import io.jstach.jstachio.JStachio;
+import io.jstach.opt.spring.webmvc.JStachioModelView;
 import jakarta.validation.Valid;
 
 /**
@@ -73,22 +83,62 @@ class VisitController {
 	// Spring MVC calls method loadPetWithVisit(...) before initNewVisitForm is
 	// called
 	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public String initNewVisitForm() {
-		return "pets/createOrUpdateVisitForm";
+	public View initNewVisitForm(Owner owner, Pet pet, Visit visit) {
+		return JStachioModelView.of(new VisitPage(owner, pet, visit));
 	}
 
 	// Spring MVC calls method loadPetWithVisit(...) before processNewVisitForm is
 	// called
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public String processNewVisitForm(@ModelAttribute Owner owner, @PathVariable int petId, @Valid Visit visit,
+	public View processNewVisitForm(Owner owner, Pet pet, @Valid Visit visit,
 			BindingResult result) {
 		if (result.hasErrors()) {
-			return "pets/createOrUpdateVisitForm";
+			return initNewVisitForm(owner, pet, visit);
 		}
 
-		owner.addVisit(petId, visit);
+		owner.addVisit(pet.getId(), visit);
 		this.owners.save(owner);
-		return "redirect:/owners/{ownerId}";
+		return new RedirectView("/owners" + owner.getId());
 	}
+
+}
+
+@JStache(path = "pets/createOrUpdateVisitForm")
+class VisitPage extends BasePage {
+
+	final Owner owner;
+	final Pet pet;
+	final Visit visit;
+
+	VisitPage(Owner owner, Pet pet, Visit visit) {
+		this.owner = owner;
+		this.pet = pet;
+		this.visit = visit;
+	}
+
+	Form form() {
+		return new Form("visit", this.pet);
+	}
+
+	String[] errors() {
+		return status("visit").getErrorMessages();
+	}
+
+	InputField date() {
+		return new InputField("Date", "date", this.visit.getDate().toString(), "date",
+				status("visit", "date"));
+	}
+
+	InputField description() {
+		return new InputField("Description", "description", this.visit.getDescription(), "text",
+				status("visit", "description"));
+	}
+
+	@JStacheLambda
+	@Raw
+	public String inputField(InputField field) {
+		return JStachio.render(field);
+	}
+
 
 }
