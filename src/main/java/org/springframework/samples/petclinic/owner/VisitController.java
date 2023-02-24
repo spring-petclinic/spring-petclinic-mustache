@@ -90,8 +90,7 @@ class VisitController {
 	// Spring MVC calls method loadPetWithVisit(...) before processNewVisitForm is
 	// called
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public View processNewVisitForm(Owner owner, Pet pet, @Valid Visit visit,
-			BindingResult result) {
+	public View processNewVisitForm(Owner owner, Pet pet, @Valid Visit visit, BindingResult result) {
 		if (result.hasErrors()) {
 			return initNewVisitForm(owner, pet, visit);
 		}
@@ -107,7 +106,9 @@ class VisitController {
 class VisitPage extends BasePage {
 
 	final Owner owner;
+
 	final Pet pet;
+
 	final Visit visit;
 
 	VisitPage(Owner owner, Pet pet, Visit visit) {
@@ -125,8 +126,7 @@ class VisitPage extends BasePage {
 	}
 
 	InputField date() {
-		return new InputField("Date", "date", this.visit.getDate().toString(), "date",
-				status("visit", "date"));
+		return new InputField("Date", "date", this.visit.getDate().toString(), "date", status("visit", "date"));
 	}
 
 	InputField description() {
@@ -139,6 +139,5 @@ class VisitPage extends BasePage {
 	public String inputField(InputField field) {
 		return JStachio.render(field);
 	}
-
 
 }

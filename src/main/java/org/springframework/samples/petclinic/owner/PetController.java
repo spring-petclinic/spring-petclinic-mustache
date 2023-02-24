@@ -101,7 +101,8 @@ class PetController {
 		}
 		if (result.hasErrors()) {
 			return initCreationForm(owner, pet, model);
-		} else {
+		}
+		else {
 			this.owners.save(owner);
 			return new RedirectView("/owners/" + owner.getId());
 		}
@@ -116,7 +117,8 @@ class PetController {
 	public View processUpdateForm(@Valid Pet pet, BindingResult result, Owner owner, ModelMap model) {
 		if (result.hasErrors()) {
 			return initCreationForm(owner, pet, model);
-		} else {
+		}
+		else {
 			this.owners.save(owner);
 			return new RedirectView("/owners/" + owner.getId());
 		}
@@ -128,7 +130,9 @@ class PetController {
 class PetPage extends BasePage {
 
 	final Pet pet;
+
 	final Owner owner;
+
 	final Collection<PetType> types;
 
 	PetPage(Owner owner, Pet pet, Collection<PetType> types) {
@@ -146,8 +150,7 @@ class PetPage extends BasePage {
 	}
 
 	InputField nameField() {
-		return new InputField("Name", "name", this.pet.getName(), "text",
-				status("pet", "name"));
+		return new InputField("Name", "name", this.pet.getName(), "text", status("pet", "name"));
 	}
 
 	InputField birthDate() {
@@ -157,8 +160,7 @@ class PetPage extends BasePage {
 
 	SelectField type() {
 		return new SelectField("Type", "type", this.pet.getType() == null ? "" : this.pet.getType().toString(),
-				this.types.stream().map(item -> item.toString()).collect(Collectors.toList()),
-				status("pet", "type"));
+				this.types.stream().map(item -> item.toString()).collect(Collectors.toList()), status("pet", "type"));
 	}
 
 	@JStacheLambda

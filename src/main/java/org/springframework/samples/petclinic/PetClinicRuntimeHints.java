@@ -16,25 +16,14 @@
 
 package org.springframework.samples.petclinic;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ImportRuntimeHints;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
 
-import io.jstach.jstache.JStacheFlags;
-import io.jstach.jstache.JStacheFlags.Flag;
+public class PetClinicRuntimeHints implements RuntimeHintsRegistrar {
 
-/**
- * PetClinic Spring Boot Application.
- *
- * @author Dave Syer Int
- */
-@JStacheFlags(flags = Flag.DEBUG)
-@SpringBootApplication(proxyBeanMethods = false)
-@ImportRuntimeHints(PetClinicRuntimeHints.class)
-public class PetClinicApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(PetClinicApplication.class, args);
+	@Override
+	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+		hints.resources().registerPattern("db/*"); // https://github.com/spring-projects/spring-boot/issues/32654
 	}
 
 }
