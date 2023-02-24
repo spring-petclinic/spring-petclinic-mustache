@@ -5,37 +5,41 @@
 
   <body>}}
 
-{{#layout}}{{#menu}}Owners{{/menu}}
+{{<fragments/layout}}{{$menu}}owners{{/menu}}{{$body}}
 
 {{#pet}}
   <h2>
     {{#new}}New {{/new}}Pet
   </h2>
+{{/pet}}
   <form class="form-horizontal" method="post">
     <input type="hidden" name="id" th:value="*{id}" />
     <div class="form-group has-feedback">
       <div class="form-group">
         <label class="col-sm-2 control-label">Owner</label>
         <div class="col-sm-10">
+{{#pet}}
           {{#owner}}<span>{{firstName}} {{lastName}}</span>{{/owner}}
+{{/pet}}
         </div>
       </div>
-      {{#form.pet}}
-        {{#inputField}}Name <input name="name"/>{{/inputField}}
-        {{#inputField}}Birth Date <input name="birthDate" type="date"/>{{/inputField}}
-        {{#selectField}}Type <input name="type" values="types"/>{{/selectField}}
-      {{/form.pet}}
+      {{#form}}
+        {{#nameField}}{{#inputField}}Name <input name="name"/>{{/inputField}}{{/nameField}}
+        {{#birthDate}}{{#inputField}}Birth Date <input name="birthDate" type="date"/>{{/inputField}}{{/birthDate}}
+        {{#type}}{{#selectField}}Type <input name="type" values="types"/>{{/selectField}}{{/type}}
+      {{/form}}
     </div>
+{{#pet}}
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
         <button class="btn btn-primary" type="submit">{{#new}}Add{{/new}}{{^new}}Update{{/new}}
           Pet</button>
       </div>
     </div>
-  </form>
 {{/pet}}
+  </form>
 
-{{/layout}}
+{{/body}}{{/fragments/layout}}
 
 {{!  </body>
 

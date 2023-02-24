@@ -15,15 +15,33 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import org.springframework.samples.petclinic.system.BasePage;
+import org.springframework.samples.petclinic.system.Form;
+import org.springframework.samples.petclinic.system.InputField;
+import org.springframework.samples.petclinic.system.SelectField;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
+import io.jstach.jstache.JStache;
+import io.jstach.jstache.JStacheLambda;
+import io.jstach.jstache.JStacheLambda.Raw;
+import io.jstach.jstachio.JStachio;
+import io.jstach.opt.spring.webmvc.JStachioModelView;
 import jakarta.validation.Valid;
-import java.util.Collection;
 
 /**
  * @author Juergen Hoeller
@@ -33,8 +51,6 @@ import java.util.Collection;
 @Controller
 @RequestMapping("/owners/{ownerId}")
 class PetController {
-
-	private static final String VIEWS_PETS_CREATE_OR_UPDATE_FORM = "pets/createOrUpdatePetForm";
 
 	private final PetRepository pets;
 
@@ -55,6 +71,12 @@ class PetController {
 		return this.owners.findById(ownerId);
 	}
 
+	@ModelAttribute("pet")
+	public Pet findPet(@PathVariable("ownerId") int ownerId,
+			@PathVariable(name = "petId", required = false) Integer petId) {
+		return petId == null ? new Pet() : this.owners.findById(ownerId).getPet(petId);
+	}
+
 	@InitBinder("owner")
 	public void initOwnerBinder(WebDataBinder dataBinder) {
 		dataBinder.setDisallowedFields("id");
@@ -63,51 +85,92 @@ class PetController {
 	@InitBinder("pet")
 	public void initPetBinder(WebDataBinder dataBinder) {
 		dataBinder.setValidator(new PetValidator());
+		dataBinder.setDisallowedFields("id");
 	}
 
 	@GetMapping("/pets/new")
-	public String initCreationForm(Owner owner, ModelMap model) {
-		Pet pet = new Pet();
+	public View initCreationForm(Owner owner, Pet pet, ModelMap model) {
 		owner.addPet(pet);
-		model.put("pet", pet);
-		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+		return JStachioModelView.of(new PetPage(owner, pet, (Collection<PetType>) model.get("types")));
 	}
 
 	@PostMapping("/pets/new")
-	public String processCreationForm(Owner owner, @Valid Pet pet, BindingResult result, ModelMap model) {
+	public View processCreationForm(Owner owner, @Valid Pet pet, BindingResult result, ModelMap model) {
 		if (StringUtils.hasLength(pet.getName()) && pet.isNew() && owner.getPet(pet.getName(), true) != null) {
 			result.rejectValue("name", "duplicate", "already exists");
 		}
-		owner.addPet(pet);
 		if (result.hasErrors()) {
-			model.put("pet", pet);
-			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
-		}
-		else {
-			this.pets.save(pet);
-			return "redirect:/owners/{ownerId}";
+			return initCreationForm(owner, pet, model);
+		} else {
+			this.owners.save(owner);
+			return new RedirectView("/owners/" + owner.getId());
 		}
 	}
 
 	@GetMapping("/pets/{petId}/edit")
-	public String initUpdateForm(@PathVariable("petId") int petId, ModelMap model) {
-		Pet pet = this.pets.findById(petId);
-		model.put("pet", pet);
-		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+	public View initUpdateForm(Owner owner, Pet pet, ModelMap model) {
+		return initCreationForm(owner, pet, model);
 	}
 
 	@PostMapping("/pets/{petId}/edit")
-	public String processUpdateForm(@Valid Pet pet, BindingResult result, Owner owner, ModelMap model) {
+	public View processUpdateForm(@Valid Pet pet, BindingResult result, Owner owner, ModelMap model) {
 		if (result.hasErrors()) {
-			pet.setOwner(owner);
-			model.put("pet", pet);
-			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+			return initCreationForm(owner, pet, model);
+		} else {
+			this.owners.save(owner);
+			return new RedirectView("/owners/" + owner.getId());
 		}
-		else {
-			owner.addPet(pet);
-			this.pets.save(pet);
-			return "redirect:/owners/{ownerId}";
-		}
+	}
+
+}
+
+@JStache(path = "pets/createOrUpdatePetForm")
+class PetPage extends BasePage {
+
+	final Pet pet;
+	final Owner owner;
+	final Collection<PetType> types;
+
+	PetPage(Owner owner, Pet pet, Collection<PetType> types) {
+		this.pet = pet;
+		this.owner = owner;
+		this.types = types;
+	}
+
+	Form form() {
+		return new Form("pet", this.pet);
+	}
+
+	String[] errors() {
+		return status("pet").getErrorMessages();
+	}
+
+	InputField nameField() {
+		return new InputField("Name", "name", this.pet.getName(), "text",
+				status("pet", "name"));
+	}
+
+	InputField birthDate() {
+		return new InputField("Birth Date", "birthDate", this.pet.getBirthDate().toString(), "date",
+				status("pet", "birthDate"));
+	}
+
+	SelectField type() {
+		return new SelectField("Type", "type", this.pet.getType() == null ? "" : this.pet.getType().toString(),
+				this.types.stream().map(item -> item.toString()).collect(Collectors.toList()),
+				status("pet", "type"));
+	}
+
+	@JStacheLambda
+	@Raw
+	public String inputField(InputField field) {
+		return JStachio.render(field);
+	}
+
+	@JStacheLambda
+	@Raw
+	public String selectField(SelectField field) {
+		return JStachio.render(field);
 	}
 
 }

@@ -46,8 +46,9 @@ public class ViewSetupInterceptor implements HandlerInterceptor, WebMvcConfigure
 			if (modelAndView.getView() instanceof JStachioModelView) {
 				return (JStachioModelView) modelAndView.getView();
 			}
-			if (this.context.getBean(modelAndView.getViewName()) instanceof JStachioModelView) {
-				return (JStachioModelView) this.context.getBean(modelAndView.getViewName());
+			String view = modelAndView.getViewName();
+			if (view != null && this.context.containsBean(view) && this.context.getBean(view) instanceof JStachioModelView) {
+				return (JStachioModelView) this.context.getBean(view);
 			}
 		}
 		return null;

@@ -24,7 +24,6 @@ import org.springframework.samples.petclinic.system.BasePage;
 import org.springframework.samples.petclinic.system.Form;
 import org.springframework.samples.petclinic.system.InputField;
 import org.springframework.samples.petclinic.system.PagedModelPage;
-import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -57,11 +56,8 @@ class OwnerController {
 
 	private final OwnerRepository owners;
 
-	private final VisitRepository visits;
-
-	public OwnerController(OwnerRepository clinicService, VisitRepository visits) {
+	public OwnerController(OwnerRepository clinicService) {
 		this.owners = clinicService;
-		this.visits = visits;
 	}
 
 	@InitBinder
@@ -119,7 +115,6 @@ class OwnerController {
 		}
 		else {
 			// multiple owners found
-			lastName = owner.getLastName();
 			return JStachioModelView.of(new OwnersPage(page, ownersResults));
 		}
 	}
@@ -160,9 +155,6 @@ class OwnerController {
 	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
 		Owner owner = this.owners.findById(ownerId);
 		ModelAndView mav = new ModelAndView(JStachioModelView.of(new OwnerPage(owner)));
-		for (Pet pet : owner.getPets()) {
-			pet.setVisitsInternal(visits.findByPetId(pet.getId()));
-		}
 		mav.addObject(owner);
 		return mav;
 	}
@@ -229,7 +221,7 @@ class EditOwnerPage extends BasePage {
 
 	@JStacheLambda
 	@Raw
-	public String render(InputField field) {
+	public String inputField(InputField field) {
 		return JStachio.render(field);
 	}
 
