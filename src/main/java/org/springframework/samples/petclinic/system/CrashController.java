@@ -17,13 +17,13 @@ package org.springframework.samples.petclinic.system;
 
 import java.util.Map;
 
-import org.springframework.samples.petclinic.mustache.PageConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import io.jstach.jstache.JStache;
 import io.jstach.opt.spring.webmvc.JStachioModelView;
+import io.jstach.opt.spring.webmvc.JStachioModelViewConfigurer;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -78,9 +78,10 @@ class CrashPage extends BasePage {
 }
 
 @Component
-class CrashPageConfigurer implements PageConfigurer {
+class CrashPageConfigurer implements JStachioModelViewConfigurer {
 
 	@Override
+	@SuppressWarnings("null")
 	public void configure(Object page, Map<String, ?> model, HttpServletRequest request) {
 		if (page instanceof CrashPage) {
 			CrashPage base = (CrashPage) page;
