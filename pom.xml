@@ -29,7 +29,7 @@
     <node.version>v8.11.1</node.version>
     <nohttp-checkstyle.version>0.0.10</nohttp-checkstyle.version>
     <spring-format.version>0.0.31</spring-format.version>
-    <jstach.version>0.9.3</jstach.version>
+    <jstach.version>1.0.0-SNAPSHOT</jstach.version>
 
   </properties>
 
