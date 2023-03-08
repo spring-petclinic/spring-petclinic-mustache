@@ -11,11 +11,11 @@
   <form class="form-horizontal" id="add-owner-form" method="post">
     {{#form}}
     <div class="form-group has-feedback">
-      {{#firstName}}{{#render}}First Name <input name="firstName"/>{{/render}}{{/firstName}}
-      {{#lastName}}{{#render}}Last Name <input name="lastName"/>{{/render}}{{/lastName}}
-      {{#address}}{{#render}}Address <input name="address"/>{{/render}}{{/address}}
-      {{#city}}{{#render}}City <input name="city"/>{{/render}}{{/city}}
-      {{#telephone}}{{#render}}Telephone <input name="telephone"/>{{/render}}{{/telephone}}
+      {{#firstName}}{{<inputField}}First Name <input name="firstName"/>{{/inputField}}{{/firstName}}
+      {{#lastName}}{{<inputField}}Last Name <input name="lastName"/>{{/inputField}}{{/lastName}}
+      {{#address}}{{<inputField}}Address <input name="address"/>{{/inputField}}{{/address}}
+      {{#city}}{{<inputField}}City <input name="city"/>{{/inputField}}{{/city}}
+      {{#telephone}}{{<inputField}}Telephone <input name="telephone"/>{{/inputField}}{{/telephone}}
     </div>
     {{/form}}
     <div class="form-group">

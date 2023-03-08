@@ -52,10 +52,4 @@ public class BasePage {
 		this.context = context;
 	}
 
-	@JStacheLambda
-	@Raw
-	public String render(Object field) {
-		return JStachio.render(field);
-	}
-
 }
