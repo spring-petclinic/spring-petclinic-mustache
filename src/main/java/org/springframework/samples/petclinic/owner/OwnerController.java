@@ -183,7 +183,7 @@ class FindOwnerPage extends BasePage {
 }
 
 @JStache(path = "owners/createOrUpdateOwnerForm")
-@JStachePartials(@JStachePartial(name = "inputField", path="fragments/inputField"))
+@JStachePartials(@JStachePartial(name = "inputField", path = "fragments/inputField"))
 class EditOwnerPage extends BasePage {
 
 	final Owner owner;

@@ -33,6 +33,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.samples.petclinic.system.Application;
+import org.springframework.samples.petclinic.system.ApplicationPageConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -45,7 +46,7 @@ import io.jstach.opt.spring.webmvc.JStachioModelView;
  */
 @WebMvcTest(value = PetController.class,
 		includeFilters = @ComponentScan.Filter(value = PetTypeFormatter.class, type = FilterType.ASSIGNABLE_TYPE))
-@Import({ Application.class })
+@Import({ Application.class, ApplicationPageConfigurer.class })
 class PetControllerTests {
 
 	private static final int TEST_OWNER_ID = 1;

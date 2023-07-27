@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.4</version>
+    <version>3.1.2</version>
   </parent>
   <name>petclinic</name>
 
@@ -28,8 +28,8 @@
     <jacoco.version>0.8.7</jacoco.version>
     <node.version>v8.11.1</node.version>
     <nohttp-checkstyle.version>0.0.10</nohttp-checkstyle.version>
-    <spring-format.version>0.0.31</spring-format.version>
-    <jstach.version>1.0.0-SNAPSHOT</jstach.version>
+    <spring-format.version>0.0.35</spring-format.version>
+    <jstach.version>1.2.1</jstach.version>
 
   </properties>
 
@@ -61,12 +61,7 @@
     </dependency>
     <dependency>
       <groupId>io.jstach</groupId>
-      <artifactId>jstachio</artifactId>
-      <version>${jstach.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.jstach</groupId>
-      <artifactId>jstachio-spring</artifactId>
+      <artifactId>jstachio-spring-boot-starter-webmvc</artifactId>
       <version>${jstach.version}</version>
     </dependency>
 
@@ -197,8 +192,8 @@
               <additionalProperties>
                 <encoding.source>${project.build.sourceEncoding}</encoding.source>
                 <encoding.reporting>${project.reporting.outputEncoding}</encoding.reporting>
-                <java.source>${maven.compiler.source}</java.source>
-                <java.target>${maven.compiler.target}</java.target>
+                <java.source>${java.version}</java.source>
+                <java.target>${java.version}</java.target>
               </additionalProperties>
             </configuration>
           </execution>

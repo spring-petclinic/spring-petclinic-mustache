@@ -16,14 +16,25 @@
 
 package org.springframework.samples.petclinic.system;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Test class for {@link CrashController}
@@ -43,6 +54,24 @@ class CrashControllerTests {
 		mockMvc.perform(get("/oups")).andExpect(view().name("exception"))
 				.andExpect(model().attributeExists("exception")).andExpect(forwardedUrl("exception"))
 				.andExpect(status().isOk());
+	}
+
+	@ControllerAdvice
+	static class MockMvcValidationConfiguration {
+
+		private final BasicErrorController errorController;
+
+		MockMvcValidationConfiguration(BasicErrorController errorController) {
+			this.errorController = errorController;
+		}
+
+		@ExceptionHandler({ MethodArgumentNotValidException.class, BindException.class })
+		ResponseEntity<?> defaultErrorHandler(HttpServletRequest request, Exception ex) {
+			request.setAttribute("javax.servlet.error.request_uri", request.getPathInfo());
+			request.setAttribute("javax.servlet.error.status_code", 400);
+			return errorController.error(request);
+		}
+
 	}
 
 }

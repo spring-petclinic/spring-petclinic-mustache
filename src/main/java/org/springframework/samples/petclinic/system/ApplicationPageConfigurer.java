@@ -18,7 +18,7 @@ package org.springframework.samples.petclinic.system;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.RequestContext;
 
 import io.jstach.opt.spring.webmvc.JStachioModelViewConfigurer;
@@ -30,7 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author Dave Syer
  *
  */
-@ControllerAdvice
+@Component
 public class ApplicationPageConfigurer implements JStachioModelViewConfigurer {
 
 	private final Application application;
@@ -40,7 +40,6 @@ public class ApplicationPageConfigurer implements JStachioModelViewConfigurer {
 	}
 
 	@Override
-	@SuppressWarnings("null")
 	public void configure(Object page, Map<String, ?> model, HttpServletRequest request) {
 		if (page instanceof BasePage) {
 			BasePage base = (BasePage) page;

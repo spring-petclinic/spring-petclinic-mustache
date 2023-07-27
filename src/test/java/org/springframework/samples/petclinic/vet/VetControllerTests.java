@@ -37,6 +37,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.samples.petclinic.system.Application;
+import org.springframework.samples.petclinic.system.ApplicationPageConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -48,7 +49,7 @@ import io.jstach.opt.spring.webmvc.JStachioModelView;
  */
 
 @WebMvcTest(VetController.class)
-@Import({ Application.class })
+@Import({ Application.class, ApplicationPageConfigurer.class })
 class VetControllerTests {
 
 	@Autowired

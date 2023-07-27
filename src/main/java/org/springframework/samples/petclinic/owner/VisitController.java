@@ -102,7 +102,7 @@ class VisitController {
 }
 
 @JStache(path = "pets/createOrUpdateVisitForm")
-@JStachePartials(@JStachePartial(name = "inputField", path="fragments/inputField"))
+@JStachePartials(@JStachePartial(name = "inputField", path = "fragments/inputField"))
 class VisitPage extends BasePage {
 
 	final Owner owner;

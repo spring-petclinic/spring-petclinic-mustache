@@ -55,11 +55,6 @@ class CrashPageView implements JStachioModelView {
 		return this.page;
 	}
 
-	@Override
-	public String getContentType() {
-		return contentType();
-	}
-
 }
 
 @JStache(path = "error")

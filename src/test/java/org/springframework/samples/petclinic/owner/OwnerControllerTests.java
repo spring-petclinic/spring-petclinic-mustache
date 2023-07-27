@@ -47,6 +47,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.samples.petclinic.system.Application;
+import org.springframework.samples.petclinic.system.ApplicationPageConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -58,7 +59,7 @@ import io.jstach.opt.spring.webmvc.JStachioModelView;
  * @author Colin But
  */
 @WebMvcTest(OwnerController.class)
-@Import({ Application.class })
+@Import({ Application.class, ApplicationPageConfigurer.class })
 class OwnerControllerTests {
 
 	private static final int TEST_OWNER_ID = 1;

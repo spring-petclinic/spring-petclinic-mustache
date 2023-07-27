@@ -30,6 +30,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.samples.petclinic.system.Application;
+import org.springframework.samples.petclinic.system.ApplicationPageConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -41,7 +42,7 @@ import io.jstach.opt.spring.webmvc.JStachioModelView;
  * @author Colin But
  */
 @WebMvcTest(VisitController.class)
-@Import({ Application.class })
+@Import({ Application.class, ApplicationPageConfigurer.class })
 class VisitControllerTests {
 
 	private static final int TEST_OWNER_ID = 1;

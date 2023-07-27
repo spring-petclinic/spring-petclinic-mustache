@@ -126,7 +126,7 @@ class PetController {
 }
 
 @JStache(path = "pets/createOrUpdatePetForm")
-@JStachePartials(@JStachePartial(name = "inputField", path="fragments/inputField"))
+@JStachePartials(@JStachePartial(name = "inputField", path = "fragments/inputField"))
 class PetPage extends BasePage {
 
 	final Pet pet;
