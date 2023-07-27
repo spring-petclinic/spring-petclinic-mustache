@@ -122,8 +122,10 @@ class OwnerController {
 		model.addAttribute("last", page == paginated.getTotalPages());
 		model.addAttribute("previous", page - 1);
 		model.addAttribute("next", page + 1);
-		model.addAttribute("pages", IntStream.range(1, paginated.getTotalPages() + 1)
-				.mapToObj(value -> pagemodel(value, page)).collect(Collectors.toList()));
+		model.addAttribute("pages",
+				IntStream.range(1, paginated.getTotalPages() + 1)
+					.mapToObj(value -> pagemodel(value, page))
+					.collect(Collectors.toList()));
 		model.addAttribute("hasPages", paginated.getTotalPages() > 1);
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("listOwners", listOwners);

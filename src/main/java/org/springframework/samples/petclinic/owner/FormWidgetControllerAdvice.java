@@ -138,8 +138,11 @@ class InputField extends HashMap<String, Object> {
 		put("name", name);
 		if (status != null) {
 			put("valid", !status.hasFieldErrors(name));
-			put("errors", status.getFieldErrors(name).stream().map(error -> error.getDefaultMessage())
-					.collect(Collectors.toList()));
+			put("errors",
+					status.getFieldErrors(name)
+						.stream()
+						.map(error -> error.getDefaultMessage())
+						.collect(Collectors.toList()));
 			put("value", status.getFieldValue(name) == null ? "" : status.getFieldValue(name).toString());
 		}
 		else {
@@ -158,8 +161,11 @@ class SelectField extends HashMap<String, Object> {
 		String value;
 		if (status != null) {
 			put("valid", !status.hasFieldErrors(name));
-			put("errors", status.getFieldErrors(name).stream().map(error -> error.getDefaultMessage())
-					.collect(Collectors.toList()));
+			put("errors",
+					status.getFieldErrors(name)
+						.stream()
+						.map(error -> error.getDefaultMessage())
+						.collect(Collectors.toList()));
 			value = status.getFieldValue(name) == null ? "" : status.getFieldValue(name).toString();
 		}
 		else {
