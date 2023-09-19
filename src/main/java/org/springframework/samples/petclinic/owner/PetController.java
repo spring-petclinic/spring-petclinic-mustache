@@ -90,7 +90,9 @@ class PetController {
 	@GetMapping("/pets/new")
 	public View initCreationForm(Owner owner, Pet pet, ModelMap model) {
 		owner.addPet(pet);
-		return JStachioModelView.of(new PetPage(owner, pet, (Collection<PetType>) model.get("types")));
+		@SuppressWarnings("unchecked")
+		Collection<PetType> types = (Collection<PetType>) model.get("types");
+		return JStachioModelView.of(new PetPage(owner, pet, types));
 	}
 
 	@PostMapping("/pets/new")

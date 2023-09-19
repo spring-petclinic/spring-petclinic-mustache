@@ -1,18 +1,12 @@
 package org.springframework.samples.petclinic.system;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.system.Application.Menu;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
-
-import io.jstach.jstache.JStacheLambda;
-import io.jstach.jstache.JStacheLambda.Raw;
-import io.jstach.jstachio.JStachio;
 
 public class BasePage {
 

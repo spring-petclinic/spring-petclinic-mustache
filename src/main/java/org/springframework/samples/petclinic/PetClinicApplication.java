@@ -16,15 +16,12 @@
 
 package org.springframework.samples.petclinic;
 
-import java.time.LocalDate;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
 import io.jstach.jstache.JStacheFlags;
 import io.jstach.jstache.JStacheFlags.Flag;
-import io.jstach.jstache.JStacheFormatterTypes;
 import io.jstach.jstache.JStachePath;
 
 /**
@@ -34,7 +31,6 @@ import io.jstach.jstache.JStachePath;
  */
 @JStachePath(prefix = "templates/", suffix = ".mustache")
 @JStacheFlags(flags = Flag.DEBUG)
-@JStacheFormatterTypes(types = LocalDate.class)
 @SpringBootApplication(proxyBeanMethods = false)
 @ImportRuntimeHints(PetClinicRuntimeHints.class)
 public class PetClinicApplication {

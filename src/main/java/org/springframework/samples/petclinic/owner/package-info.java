@@ -1,5 +1,5 @@
 @JStacheConfig(using = PetClinicApplication.class)
-@JStacheFormatterTypes(types = { PetType.class })
+@JStacheFormatterTypes(types = { PetType.class, LocalDate.class })
 package org.springframework.samples.petclinic.owner;
 
 import java.time.LocalDate;
