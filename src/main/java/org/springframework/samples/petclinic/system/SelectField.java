@@ -39,6 +39,3 @@ public class SelectField {
 	}
 
 }
-
-record SelectValue(String value, boolean selected) {
-}

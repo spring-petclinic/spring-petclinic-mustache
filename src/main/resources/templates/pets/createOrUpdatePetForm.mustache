@@ -26,7 +26,7 @@
       {{#form}}
         {{#nameField}}{{<inputField}}Name <input name="name"/>{{/inputField}}{{/nameField}}
         {{#birthDate}}{{<inputField}}Birth Date <input name="birthDate" type="date"/>{{/inputField}}{{/birthDate}}
-        {{#type}}{{<inputField}}Type <input name="type" values="types"/>{{/inputField}}{{/type}}
+        {{#type}}{{<selectField}}Type <input name="type" values="types"/>{{/selectField}}{{/type}}
       {{/form}}
     </div>
 {{#pet}}
