@@ -21,11 +21,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import jakarta.validation.Valid;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.system.InputField;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,6 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import jakarta.validation.Valid;
+
 /**
  * @author Juergen Hoeller
  * @author Ken Krebs
@@ -47,14 +48,12 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 class OwnerController {
 
-	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
-
 	private final OwnerRepository owners;
 
 	private final VisitRepository visits;
 
-	public OwnerController(OwnerRepository clinicService, VisitRepository visits) {
-		this.owners = clinicService;
+	public OwnerController(OwnerRepository owners, VisitRepository visits) {
+		this.owners = owners;
 		this.visits = visits;
 	}
 
@@ -64,26 +63,23 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/new")
-	public String initCreationForm(Map<String, Object> model) {
-		Owner owner = new Owner();
-		model.put("owner", owner);
-		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
+	public String initCreationForm(Owner owner, Model model) {
+		model.addAttribute("form", new OwnerForm(owner));
+		return "owners/createOrUpdateOwnerForm";
 	}
 
 	@PostMapping("/owners/new")
-	public String processCreationForm(@Valid Owner owner, BindingResult result) {
+	public String processCreationForm(@Valid Owner owner, BindingResult result, Model model) {
 		if (result.hasErrors()) {
-			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
-		}
-		else {
+			return initCreationForm(owner, model);
+		} else {
 			this.owners.save(owner);
 			return "redirect:/owners/" + owner.getId();
 		}
 	}
 
 	@GetMapping("/owners/find")
-	public String initFindForm(Map<String, Object> model) {
-		model.put("owner", new Owner());
+	public String initFindForm(Owner owner) {
 		return "owners/findOwners";
 	}
 
@@ -103,13 +99,11 @@ class OwnerController {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
 			return "owners/findOwners";
-		}
-		else if (ownersResults.getTotalElements() == 1) {
+		} else if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
 			return "redirect:/owners/" + owner.getId();
-		}
-		else {
+		} else {
 			// multiple owners found
 			lastName = owner.getLastName();
 			return addPaginationModel(page, model, lastName, ownersResults);
@@ -124,8 +118,8 @@ class OwnerController {
 		model.addAttribute("next", page + 1);
 		model.addAttribute("pages",
 				IntStream.range(1, paginated.getTotalPages() + 1)
-					.mapToObj(value -> pagemodel(value, page))
-					.collect(Collectors.toList()));
+						.mapToObj(value -> pagemodel(value, page))
+						.collect(Collectors.toList()));
 		model.addAttribute("hasPages", paginated.getTotalPages() > 1);
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("listOwners", listOwners);
@@ -151,16 +145,15 @@ class OwnerController {
 	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
-		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
+		return initCreationForm(owner, model);
 	}
 
 	@PostMapping("/owners/{ownerId}/edit")
 	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result,
-			@PathVariable("ownerId") int ownerId) {
+			@PathVariable("ownerId") int ownerId, Model model) {
 		if (result.hasErrors()) {
-			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
-		}
-		else {
+			return initCreationForm(owner, model);
+		} else {
 			owner.setId(ownerId);
 			this.owners.save(owner);
 			return "redirect:/owners/{ownerId}";
@@ -169,6 +162,7 @@ class OwnerController {
 
 	/**
 	 * Custom handler for displaying an owner.
+	 * 
 	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
 	 */
@@ -183,4 +177,32 @@ class OwnerController {
 		return mav;
 	}
 
+	static class OwnerForm {
+
+		final Owner owner;
+
+		OwnerForm(Owner owner) {
+			this.owner = owner;
+		}
+
+		InputField getFirstName() {
+			return new InputField("First Name", "firstName", this.owner.getFirstName(), "text");
+		}
+
+		InputField getLastName() {
+			return new InputField("Last Name", "lastName", this.owner.getLastName(), "text");
+		}
+
+		InputField getAddress() {
+			return new InputField("Address", "address", this.owner.getAddress(), "text");
+		}
+
+		InputField getCity() {
+			return new InputField("City", "city", this.owner.getCity(), "text");
+		}
+
+		InputField getTelephone() {
+			return new InputField("Telephone", "telephone", this.owner.getTelephone(), "text");
+		}
+	}
 }

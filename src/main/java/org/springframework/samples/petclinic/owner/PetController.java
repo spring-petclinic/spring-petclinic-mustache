@@ -15,15 +15,24 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import org.springframework.samples.petclinic.system.InputField;
+import org.springframework.samples.petclinic.system.SelectField;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.validation.Valid;
-import java.util.Collection;
 
 /**
  * @author Juergen Hoeller
@@ -34,8 +43,6 @@ import java.util.Collection;
 @RequestMapping("/owners/{ownerId}")
 class PetController {
 
-	private static final String VIEWS_PETS_CREATE_OR_UPDATE_FORM = "pets/createOrUpdatePetForm";
-
 	private final PetRepository pets;
 
 	private final OwnerRepository owners;
@@ -45,9 +52,13 @@ class PetController {
 		this.owners = owners;
 	}
 
-	@ModelAttribute("types")
-	public Collection<PetType> populatePetTypes() {
+	private Collection<PetType> populatePetTypes() {
 		return this.pets.findPetTypes();
+	}
+
+	@ModelAttribute("pet")
+	public Pet findPet(@PathVariable(name = "petId", required = false) Integer petId) {
+		return petId == null ? new Pet() : pets.findById(petId);
 	}
 
 	@ModelAttribute("owner")
@@ -62,15 +73,15 @@ class PetController {
 
 	@InitBinder("pet")
 	public void initPetBinder(WebDataBinder dataBinder) {
+		dataBinder.setDisallowedFields("id");
 		dataBinder.setValidator(new PetValidator());
 	}
 
 	@GetMapping("/pets/new")
-	public String initCreationForm(Owner owner, ModelMap model) {
-		Pet pet = new Pet();
+	public String initCreationForm(Owner owner, Pet pet, ModelMap model) {
 		owner.addPet(pet);
-		model.put("pet", pet);
-		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+		model.addAttribute("form", new PetForm(pet, populatePetTypes()));
+		return "pets/createOrUpdatePetForm";
 	}
 
 	@PostMapping("/pets/new")
@@ -81,19 +92,16 @@ class PetController {
 		owner.addPet(pet);
 		if (result.hasErrors()) {
 			model.put("pet", pet);
-			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
-		}
-		else {
+			return initCreationForm(owner, pet, model);
+		} else {
 			this.pets.save(pet);
 			return "redirect:/owners/{ownerId}";
 		}
 	}
 
 	@GetMapping("/pets/{petId}/edit")
-	public String initUpdateForm(@PathVariable("petId") int petId, ModelMap model) {
-		Pet pet = this.pets.findById(petId);
-		model.put("pet", pet);
-		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+	public String initUpdateForm(Owner owner, Pet pet, ModelMap model) {
+		return initCreationForm(owner, pet, model);
 	}
 
 	@PostMapping("/pets/{petId}/edit")
@@ -101,13 +109,38 @@ class PetController {
 		if (result.hasErrors()) {
 			pet.setOwner(owner);
 			model.put("pet", pet);
-			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
-		}
-		else {
+			return initCreationForm(owner, pet, model);
+		} else {
 			owner.addPet(pet);
 			this.pets.save(pet);
 			return "redirect:/owners/{ownerId}";
 		}
+	}
+
+	static class PetForm {
+
+		final Pet pet;
+
+		final Collection<PetType> types;
+
+		PetForm(Pet pet, Collection<PetType> types) {
+			this.pet = pet;
+			this.types = types;
+		}
+
+		InputField nameField() {
+			return new InputField("Name", "name", this.pet.getName(), "text");
+		}
+
+		InputField birthDate() {
+			return new InputField("Birth Date", "birthDate", this.pet.getBirthDate().toString(), "date");
+		}
+
+		SelectField type() {
+			return new SelectField("Type", "type", this.pet.getType() == null ? "" : this.pet.getType().toString(),
+					this.types.stream().map(item -> item.toString()).collect(Collectors.toList()));
+		}
+
 	}
 
 }

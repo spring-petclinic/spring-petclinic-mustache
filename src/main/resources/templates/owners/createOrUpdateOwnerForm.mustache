@@ -5,19 +5,19 @@
 
   <body>}}
 
-{{#layout}}{{#menu}}Owners{{/menu}}
+{{<fragments/layout}}{{$menu}}owners{{/menu}}{{$body}}
 
   <h2>Owner</h2>
   <form class="form-horizontal" id="add-owner-form" method="post">
-    {{#form.owner}}
+    {{#form}}
     <div class="form-group has-feedback">
-      {{#inputField}}First Name <input name="firstName"/>{{/inputField}}
-      {{#inputField}}Last Name <input name="lastName"/>{{/inputField}}
-      {{#inputField}}Address <input name="address"/>{{/inputField}}
-      {{#inputField}}City <input name="city"/>{{/inputField}}
-      {{#inputField}}Telephone <input name="telephone"/>{{/inputField}}
+      {{#firstName}}{{<fragments/inputField}}First Name <input name="firstName"/>{{/fragments/inputField}}{{/firstName}}
+      {{#lastName}}{{<fragments/inputField}}Last Name <input name="lastName"/>{{/fragments/inputField}}{{/lastName}}
+      {{#address}}{{<fragments/inputField}}Address <input name="address"/>{{/fragments/inputField}}{{/address}}
+      {{#city}}{{<fragments/inputField}}City <input name="city"/>{{/fragments/inputField}}{{/city}}
+      {{#telephone}}{{<fragments/inputField}}Telephone <input name="telephone"/>{{/fragments/inputField}}{{/telephone}}
     </div>
-    {{/form.owner}}
+    {{/form}}
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
         {{#owner}}<button
@@ -29,7 +29,7 @@
     </div>
   </form>
 
-{{/layout}}
+{{/body}}{{/fragments/layout}}
 
 {{!  </body>
 

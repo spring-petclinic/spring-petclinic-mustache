@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.samples.petclinic.vet.VetRepository;
 
@@ -26,6 +27,10 @@ class PetclinicIntegrationTests {
 
 	@Autowired
 	private VetRepository vets;
+
+	public static void main(String[] args) {
+		SpringApplication.run(PetClinicApplication.class, args);
+	}
 
 	@Test
 	void testFindAll() throws Exception {

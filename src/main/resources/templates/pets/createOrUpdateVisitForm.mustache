@@ -5,13 +5,13 @@
 
   <body>}}
 
-{{#layout}}{{#menu}}Owners{{/menu}}
+{{<fragments/layout}}{{$menu}}owners{{/menu}}{{$body}}
 
   <h2>
-    {{#visit.new}}New {{/visit.new}}
-    Visit
+    {{#visit.new}}New {{/visit.new}} Visit
   </h2>
 
+{{#pet}}
   <b>Pet</b>
   <table class="table table-striped">
     <thead>
@@ -23,20 +23,20 @@
       </tr>
     </thead>
     <tr>
-      <td>{{pet.name}}</td>
-      <td>{{pet.birthDate}}</td>
-      <td>{{pet.type}}</td>
-      <td>{{pet.owner.firstName}} {{pet.owner.lastName}}</td>
+      <td>{{name}}</td>
+      <td>{{birthDate}}</td>
+      <td>{{type}}</td>
+      {{#owner}}<td>{{owner.firstName}} {{lastName}}</td>{{/owner}}
     </tr>
   </table>
+{{/pet}}
 
-{{#visit}}
   <form class="form-horizontal" method="post">
     <div class="form-group has-feedback">
-      {{#form.visit}}
-        {{#inputField}}Date <input name="date" type="date"/>{{/inputField}}
-        {{#inputField}}Description <input name="description"/>{{/inputField}}
-      {{/form.visit}}
+      {{#form}}
+        {{#date}}{{<fragments/inputField}}Date <input name="date" type="date"/>{{/fragments/inputField}}{{/date}}
+        {{#description}}{{<fragments/inputField}}Description <input name="description"/>{{/fragments/inputField}}{{/description}}
+      {{/form}}
     </div>
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
@@ -45,7 +45,6 @@
       </div>
     </div>
   </form>
-{{/visit}}
 
   <br />
   <b>Previous Visits</b>
@@ -61,7 +60,7 @@
   </table>
 
 
-{{/layout}}
+{{/body}}{{/fragments/layout}}
 
 {{!  </body>
 

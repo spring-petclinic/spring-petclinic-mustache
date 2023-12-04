@@ -15,18 +15,20 @@
  */
 package org.springframework.samples.petclinic.system;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.samples.petclinic.system.Application.Menu;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.support.RequestContext;
 
-import com.samskivert.mustache.Mustache;
-import com.samskivert.mustache.Mustache.Compiler;
-import com.samskivert.mustache.Template.Fragment;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Utilities for rendering the HTML layout (menus, logs etc.)
@@ -34,59 +36,50 @@ import com.samskivert.mustache.Template.Fragment;
  * @author Dave Syer
  *
  */
-@ControllerAdvice
-public class LayoutAdvice {
-
-	private final Mustache.Compiler compiler;
+@Component
+public class LayoutAdvice implements HandlerInterceptor, WebMvcConfigurer {
 
 	private Application application;
 
-	public LayoutAdvice(Mustache.Compiler compiler, Application application) {
-		this.compiler = compiler;
+	public LayoutAdvice(Application application) {
 		this.application = application;
 	}
 
-	@ModelAttribute("menus")
-	public Iterable<Menu> menus(@ModelAttribute Layout layout) {
-		for (Menu menu : application.getMenus()) {
-			menu.setActive(false);
-		}
-		return application.getMenus();
-	}
-
-	@ModelAttribute("menu")
-	public Mustache.Lambda menu(@ModelAttribute Layout layout) {
-		return (frag, out) -> {
-			Menu menu = application.getMenu(frag.execute());
-			menu.setActive(true);
-			layout.setTitle(menu.getTitle());
-		};
-	}
-
-	@ModelAttribute("layout")
-	public Mustache.Lambda layout(Map<String, Object> model) {
-		return new Layout(compiler);
-	}
-
-}
-
-class Layout extends HashMap<String, String> implements Mustache.Lambda {
-
-	private Compiler compiler;
-
-	public Layout(Compiler compiler) {
-		this.compiler = compiler;
-		setTitle("Spring PetClinic");
-	}
-
-	public void setTitle(String title) {
-		put("title", title);
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+		return HandlerInterceptor.super.preHandle(request, response, handler);
 	}
 
 	@Override
-	public void execute(Fragment frag, Writer out) throws IOException {
-		put("body", frag.execute());
-		compiler.compile("{{>fragments/layout}}").execute(frag.context(), out);
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
+		for (Menu menu : application.getMenus()) {
+			menu.setActive(false);
+		}
+		if (modelAndView != null) {
+			Map<String, Object> map = modelAndView.getModel();
+			if (map.containsKey("owner") || map.containsKey("owners")) {
+				application.getMenu("owners").setActive(true);
+			} else if (map.containsKey("vets")) {
+				application.getMenu("vets").setActive(true);
+			} else {
+				application.getMenu("home").setActive(true);
+			}
+			modelAndView.addObject("menus", application.getMenus());
+			RequestContext context = new RequestContext(request, map);
+			for (String key : new HashSet<>(map.keySet())) {
+				if (key.startsWith("org.springframework.validation.BindingResult.")) {
+					String name = key.substring(key.lastIndexOf(".")+1);
+					modelAndView.addObject("errors", context.getBindStatus(name + ".*").getErrorMessages());
+				}
+			}
+		}
+	}
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(this);
 	}
 
 }
