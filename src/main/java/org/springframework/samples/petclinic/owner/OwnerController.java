@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.system.Form;
 import org.springframework.samples.petclinic.system.InputField;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.support.RequestContext;
 
 import jakarta.validation.Valid;
 
@@ -72,7 +74,8 @@ class OwnerController {
 	public String processCreationForm(@Valid Owner owner, BindingResult result, Model model) {
 		if (result.hasErrors()) {
 			return initCreationForm(owner, model);
-		} else {
+		}
+		else {
 			this.owners.save(owner);
 			return "redirect:/owners/" + owner.getId();
 		}
@@ -99,11 +102,13 @@ class OwnerController {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
 			return "owners/findOwners";
-		} else if (ownersResults.getTotalElements() == 1) {
+		}
+		else if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
 			return "redirect:/owners/" + owner.getId();
-		} else {
+		}
+		else {
 			// multiple owners found
 			lastName = owner.getLastName();
 			return addPaginationModel(page, model, lastName, ownersResults);
@@ -118,8 +123,8 @@ class OwnerController {
 		model.addAttribute("next", page + 1);
 		model.addAttribute("pages",
 				IntStream.range(1, paginated.getTotalPages() + 1)
-						.mapToObj(value -> pagemodel(value, page))
-						.collect(Collectors.toList()));
+					.mapToObj(value -> pagemodel(value, page))
+					.collect(Collectors.toList()));
 		model.addAttribute("hasPages", paginated.getTotalPages() > 1);
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("listOwners", listOwners);
@@ -149,11 +154,12 @@ class OwnerController {
 	}
 
 	@PostMapping("/owners/{ownerId}/edit")
-	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result,
-			@PathVariable("ownerId") int ownerId, Model model) {
+	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result, @PathVariable("ownerId") int ownerId,
+			Model model) {
 		if (result.hasErrors()) {
 			return initCreationForm(owner, model);
-		} else {
+		}
+		else {
 			owner.setId(ownerId);
 			this.owners.save(owner);
 			return "redirect:/owners/{ownerId}";
@@ -162,7 +168,6 @@ class OwnerController {
 
 	/**
 	 * Custom handler for displaying an owner.
-	 * 
 	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
 	 */
@@ -177,32 +182,58 @@ class OwnerController {
 		return mav;
 	}
 
-	static class OwnerForm {
+	static class OwnerForm implements Form {
 
 		final Owner owner;
 
+		private InputField firstName;
+
+		private InputField lastName;
+
+		private InputField address;
+
+		private InputField city;
+
+		private InputField telephone;
+
 		OwnerForm(Owner owner) {
 			this.owner = owner;
+			firstName = new InputField("First Name", "firstName", this.owner.getFirstName(), "text");
+			lastName = new InputField("Last Name", "lastName", this.owner.getLastName(), "text");
+			address = new InputField("Address", "address", this.owner.getAddress(), "text");
+			city = new InputField("City", "city", this.owner.getCity(), "text");
+			telephone = new InputField("Telephone", "telephone", this.owner.getTelephone(), "text");
 		}
 
 		InputField getFirstName() {
-			return new InputField("First Name", "firstName", this.owner.getFirstName(), "text");
+			return firstName;
 		}
 
 		InputField getLastName() {
-			return new InputField("Last Name", "lastName", this.owner.getLastName(), "text");
+			return lastName;
 		}
 
 		InputField getAddress() {
-			return new InputField("Address", "address", this.owner.getAddress(), "text");
+			return address;
 		}
 
 		InputField getCity() {
-			return new InputField("City", "city", this.owner.getCity(), "text");
+			return city;
 		}
 
 		InputField getTelephone() {
-			return new InputField("Telephone", "telephone", this.owner.getTelephone(), "text");
+			return telephone;
 		}
+
+		@Override
+		public void setContext(RequestContext context) {
+			firstName.setStatus(context.getBindStatus("owner.firstName"));
+			lastName.setStatus(context.getBindStatus("owner.lastName"));
+			address.setStatus(context.getBindStatus("owner.address"));
+			city.setStatus(context.getBindStatus("owner.city"));
+			telephone.setStatus(context.getBindStatus("owner.telephone"));
+		}
+
 	}
+
 }

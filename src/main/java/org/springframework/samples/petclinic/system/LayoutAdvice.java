@@ -61,17 +61,22 @@ public class LayoutAdvice implements HandlerInterceptor, WebMvcConfigurer {
 			Map<String, Object> map = modelAndView.getModel();
 			if (map.containsKey("owner") || map.containsKey("owners")) {
 				application.getMenu("owners").setActive(true);
-			} else if (map.containsKey("vets")) {
+			}
+			else if (map.containsKey("vets")) {
 				application.getMenu("vets").setActive(true);
-			} else {
+			}
+			else {
 				application.getMenu("home").setActive(true);
 			}
 			modelAndView.addObject("menus", application.getMenus());
 			RequestContext context = new RequestContext(request, map);
 			for (String key : new HashSet<>(map.keySet())) {
 				if (key.startsWith("org.springframework.validation.BindingResult.")) {
-					String name = key.substring(key.lastIndexOf(".")+1);
+					String name = key.substring(key.lastIndexOf(".") + 1);
 					modelAndView.addObject("errors", context.getBindStatus(name + ".*").getErrorMessages());
+					if (map.get(name) instanceof Form field) {
+						field.setContext(context);
+					}
 				}
 			}
 		}

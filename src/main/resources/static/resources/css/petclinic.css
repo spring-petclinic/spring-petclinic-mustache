@@ -7841,7 +7841,8 @@ table td.action-column {
   width: 1px; }
 
 .help-block {
-  color: #b6afaa; }
+  color: #b6afaa;
+  display: block; }
 
 .xd-containers {
   font-size: 15px; }

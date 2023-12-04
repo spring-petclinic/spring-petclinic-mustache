@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.web.servlet.support.BindStatus;
 
-public class SelectField {
+public class SelectField implements FormField {
 
 	public String label;
 
@@ -30,6 +30,7 @@ public class SelectField {
 		}
 	}
 
+	@Override
 	public void setStatus(BindStatus status) {
 		if (status != null) {
 			valid = !status.isError();
@@ -37,4 +38,5 @@ public class SelectField {
 			value = status.getValue() == null ? "" : status.getValue().toString();
 		}
 	}
+
 }

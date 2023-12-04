@@ -157,6 +157,7 @@ table td.action-column {
 
 .help-block {
   color: lighten($text-color, 50%); // lighten the text some for contrast
+  display: block;
 }
 
 .xd-containers {

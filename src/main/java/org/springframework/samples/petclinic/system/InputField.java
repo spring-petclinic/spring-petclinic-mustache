@@ -2,7 +2,7 @@ package org.springframework.samples.petclinic.system;
 
 import org.springframework.web.servlet.support.BindStatus;
 
-public class InputField {
+public class InputField implements FormField {
 
 	public String label;
 
@@ -23,6 +23,7 @@ public class InputField {
 		this.date = "date".equals(type);
 	}
 
+	@Override
 	public void setStatus(BindStatus status) {
 		if (status != null) {
 			valid = !status.isError();

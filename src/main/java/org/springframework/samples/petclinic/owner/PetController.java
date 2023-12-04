@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.owner;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.springframework.samples.petclinic.system.Form;
 import org.springframework.samples.petclinic.system.InputField;
 import org.springframework.samples.petclinic.system.SelectField;
 import org.springframework.stereotype.Controller;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.support.RequestContext;
 
 import jakarta.validation.Valid;
 
@@ -93,7 +95,8 @@ class PetController {
 		if (result.hasErrors()) {
 			model.put("pet", pet);
 			return initCreationForm(owner, pet, model);
-		} else {
+		}
+		else {
 			this.pets.save(pet);
 			return "redirect:/owners/{ownerId}";
 		}
@@ -110,35 +113,52 @@ class PetController {
 			pet.setOwner(owner);
 			model.put("pet", pet);
 			return initCreationForm(owner, pet, model);
-		} else {
+		}
+		else {
 			owner.addPet(pet);
 			this.pets.save(pet);
 			return "redirect:/owners/{ownerId}";
 		}
 	}
 
-	static class PetForm {
+	static class PetForm implements Form {
 
 		final Pet pet;
 
 		final Collection<PetType> types;
 
+		private InputField nameField;
+
+		private InputField birthDate;
+
+		private SelectField type;
+
 		PetForm(Pet pet, Collection<PetType> types) {
 			this.pet = pet;
 			this.types = types;
+			nameField = new InputField("Name", "name", this.pet.getName(), "text");
+			birthDate = new InputField("Birth Date", "birthDate", this.pet.getBirthDate().toString(), "date");
+			type = new SelectField("Type", "type", this.pet.getType() == null ? "" : this.pet.getType().toString(),
+					this.types.stream().map(item -> item.toString()).collect(Collectors.toList()));
 		}
 
 		InputField nameField() {
-			return new InputField("Name", "name", this.pet.getName(), "text");
+			return nameField;
 		}
 
 		InputField birthDate() {
-			return new InputField("Birth Date", "birthDate", this.pet.getBirthDate().toString(), "date");
+			return birthDate;
 		}
 
 		SelectField type() {
-			return new SelectField("Type", "type", this.pet.getType() == null ? "" : this.pet.getType().toString(),
-					this.types.stream().map(item -> item.toString()).collect(Collectors.toList()));
+			return type;
+		}
+
+		@Override
+		public void setContext(RequestContext context) {
+			nameField.setStatus(context.getBindStatus("pet.name"));
+			birthDate.setStatus(context.getBindStatus("pet.birthDate"));
+			type.setStatus(context.getBindStatus("pet.type"));
 		}
 
 	}
